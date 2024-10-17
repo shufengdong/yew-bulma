@@ -7,6 +7,13 @@ description = "A Yew component library based on the Bulma CSS framework."
 categories = ["wasm", "web-programming"]
 keywords = ["wasm", "web", "bulma", "sass", "yew"]
 
+[workspace.package]
+rust-version = "1.80.0"
+edition = "2021"
+repository = "https://github.com/shufengdong/yew-bulma"
+license = "Apache-2.0"
+authors = ["dongshufeng <dongshufeng@zju.edu.cn>"]
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [features]
 calendar = ["chrono"]
