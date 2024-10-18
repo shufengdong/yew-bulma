@@ -7,13 +7,16 @@ use yew::virtual_dom::VNode;
 pub struct Tiles {
     pub id: String,
     pub with_box: bool,
-    pub class_str: Vec<String>
+    pub class_str: Vec<String>,
+    pub style_str: Vec<String>
 }
 
 impl Tiles {
     pub fn create_html(&self, mut nodes: HashMap<usize, VNode>) -> Html {
         let cells: Html = (0..self.class_str.len()).map(|i| {
-            let mut div = html! { <div class={self.class_str[i].clone()} /> };
+            let mut div = html! {
+                <div class={self.class_str[i].clone()} style={self.style_str[i].clone()} />
+            };
             if let Some(node) = nodes.remove(&i) {
                 if self.with_box {
                     let mut box_node = html! { <div class={"box"} /> };
