@@ -8,6 +8,8 @@ pub struct CardProps {
     pub classes: Option<Classes>,
     #[prop_or("".to_string())]
     pub width: String,
+    #[prop_or("".to_string())]
+    pub height: String,
 }
 
 /// An all-around flexible and composable component; this is the card container.
@@ -30,9 +32,19 @@ impl Component for Card {
     fn view(&self, ctx: &Context<Self>) -> Html {
         let mut classes = Classes::from("card");
         classes.push(&ctx.props().classes);
-        let width = format!("width:{}", ctx.props().width);
+        let mut style = String::new();
+        if !ctx.props().width.is_empty() {
+            style.push_str(&format!("width:{}", ctx.props().width));
+        }
+        if !ctx.props().height.is_empty() {
+            if style.is_empty() {
+                style.push_str(&format!("height:{}", ctx.props().height));
+            } else {
+                style.push_str(&format!(";height:{}", ctx.props().height));
+            }
+        }
         html! {
-            <div class={classes} style={width}>
+            <div class={classes} style={style}>
                 { for ctx.props().children.iter() }
             </div>
         }
