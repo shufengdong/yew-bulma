@@ -1,7 +1,7 @@
 use std::num::ParseIntError;
 use std::str::FromStr;
 
-use chrono::{Datelike, Local, TimeZone, Utc};
+use chrono::{Datelike, Local, NaiveDateTime, TimeZone, Utc};
 use serde::{Deserialize, Serialize};
 
 pub use datepicker::*;
@@ -109,4 +109,22 @@ pub fn get_format_time(timestamp: &u64, format: &str) -> String {
             .naive_utc()),
     );
     dt.format(format).to_string()
+}
+
+#[inline]
+pub fn get_utc_time(local_time: &str, format: &str) -> Option<u64> {
+    let dt = NaiveDateTime::parse_from_str(local_time, format).ok()?.and_local_timezone(Local).single().unwrap();
+    Some(dt.timestamp() as u64)
+}
+
+#[test]
+fn test_get_time() {
+    let t = get_utc_time("2015-09-05 23:56:04", "%Y-%m-%d %H:%M:%S");
+    assert_eq!(t.is_some(), true);
+    let t = t.unwrap();
+    let l = Local
+        .with_ymd_and_hms(2015, 9, 05, 23, 56, 4)
+        .unwrap();
+    let t2 = l.timestamp() as u64;
+    assert_eq!(t, t2);
 }
