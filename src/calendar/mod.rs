@@ -114,7 +114,7 @@ pub fn get_format_time(timestamp: &u64, format: &str) -> String {
 #[inline]
 pub fn get_utc_time(local_time: &str, format: &str) -> Option<u64> {
     let dt = NaiveDateTime::parse_from_str(local_time, format).ok()?.and_local_timezone(Local).single().unwrap();
-    Some(dt.timestamp() as u64)
+    Some(dt.timestamp_millis() as u64)
 }
 
 #[test]
@@ -125,6 +125,14 @@ fn test_get_time() {
     let l = Local
         .with_ymd_and_hms(2015, 9, 05, 23, 56, 4)
         .unwrap();
-    let t2 = l.timestamp() as u64;
+    let t2 = l.timestamp_millis() as u64;
     assert_eq!(t, t2);
+    let t = get_utc_time("2024-11-01 07:38:50.915", "%Y-%m-%d %H:%M:%S%.3f");
+    assert_eq!(t.is_some(), true);
+    let t = t.unwrap();
+    let l = Local
+        .with_ymd_and_hms(2024, 11, 1, 7, 38, 50)
+        .unwrap();
+    let t2 = l.timestamp_millis() as u64;
+    assert_eq!(t, t2 + 915);
 }
