@@ -72,7 +72,11 @@ impl Component for MyList {
     fn view(&self, ctx: &Context<Self>) -> Html {
         let link = ctx.link();
         let start = (self.current_pagination - 1) * self.row_num_per_page;
-        let len = usize::min(self.row_num_per_page, ctx.props().paths.len() - start);
+        let len = if self.row_num_per_page != 0 {
+            usize::min(self.row_num_per_page, ctx.props().paths.len() - start)
+        } else {
+            ctx.props().paths.len()
+        };
         let list_content = (0..len).map(|i| {
             let index = i + start;
             let name = ctx.props().paths[index].clone();
