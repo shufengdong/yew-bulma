@@ -117,7 +117,6 @@ impl Component for DatePicker {
                         }
                         let s = s.unwrap();
                         let format_str = format!("{}", s);
-                        log::debug!("{}", format_str);
                         match ctx.props().picker_type {
                             PickerType::Datetime | PickerType::Date => {
                                 if ctx.props().is_range {
