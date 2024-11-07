@@ -171,27 +171,19 @@ impl Component for DatePicker {
                                     }
                                     let start_str = format!("{} {}", TIMESTAMP_DATE_START, tmp_s[0].trim());
                                     let end_str = format!("{} {}", TIMESTAMP_DATE_START, tmp_s[1].trim());
-                                    if let Ok(naivedate) = NaiveDateTime::parse_from_str(start_str.as_str(), DATE_TIME_FORMAT) {
-                                        if let Single(start_t) = naivedate.and_local_timezone(Local) {
-                                            if let Ok(naivedate2) = NaiveDateTime::parse_from_str(end_str.as_str(), DATE_TIME_FORMAT) {
-                                                if let Single(end_t) = naivedate2.and_local_timezone(Local) {
-                                                    let start = start_t.timestamp_millis() as u64;
-                                                    let end = end_t.timestamp_millis() as u64;
-                                                    // ctx.props().on_date_picked.emit((start, end + 59999));
-                                                    ctx.props().on_date_picked.emit((start, end));
-                                                }
-                                            }
-                                        }
+                                    if let (Ok(start_t), Ok(end_t)) = 
+                                        (NaiveDateTime::parse_from_str(start_str.as_str(), DATE_TIME_FORMAT), NaiveDateTime::parse_from_str(end_str.as_str(), DATE_TIME_FORMAT)) {
+                                        let start = start_t.and_utc().timestamp_millis() as u64;
+                                        let end = end_t.and_utc().timestamp_millis() as u64;
+                                        ctx.props().on_date_picked.emit((start, end));
                                     }
                                 } else {
                                     let start_str = format!("{} {}", TIMESTAMP_DATE_START, s);
-                                    if let Ok(naivedate) = NaiveDateTime::parse_from_str(start_str.as_str(), DATE_TIME_FORMAT) {
-                                        if let Single(start_t) = naivedate.and_local_timezone(Local) {
-                                            let start = start_t.timestamp_millis() as u64;
-                                            ctx.props()
-                                                .on_date_picked
-                                                .emit((start, start + 24 * 60 * 60 * 1000 - 1));
-                                        }
+                                    if let Ok(start_t) = NaiveDateTime::parse_from_str(start_str.as_str(), DATE_TIME_FORMAT) {
+                                        let start = start_t.and_utc().timestamp_millis() as u64;
+                                        ctx.props()
+                                            .on_date_picked
+                                            .emit((start, start + 24 * 60 * 60 * 1000 - 1));
                                     }
                                 }
                             }
