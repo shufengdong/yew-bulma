@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use chrono::{Local, LocalResult::Single, NaiveDateTime, Offset, TimeZone};
+use chrono::{Local, LocalResult::Single, NaiveDateTime, NaiveTime, Timelike, Offset, TimeZone};
 use js_sys::{Date, Function, JsString, Object, Reflect};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::{JsCast, JsValue};
@@ -23,7 +23,8 @@ pub const UI_TEXT_IDS: [&str; 7] = [
 
 const DATE_TIME_FORMAT: &str = "%m/%d/%Y %H:%M";
 const DIALOG_ID: &str = "datepicker_dialog";
-const TIMESTAMP_DATE_START: &str = "01/01/1970";
+const TIME_FORMAT: &str = "%H:%M";
+const TIME_MAX: u64 = 24 * 60 * 60 * 1000_u64;
 
 #[wasm_bindgen]
 extern "C" {
@@ -156,33 +157,29 @@ impl Component for DatePicker {
                                     if let Ok(naivedate) = NaiveDateTime::parse_from_str(start_str.as_str(), DATE_TIME_FORMAT) {
                                         if let Single(start_t) = naivedate.and_local_timezone(Local) {
                                             let start = start_t.timestamp_millis() as u64;
-                                            ctx.props().on_date_picked.emit((start, start + 24 * 60 * 60 * 1000 - 1));
+                                            ctx.props().on_date_picked.emit((start, start + TIME_MAX - 1));
                                         }
                                     }
                                 }
                             }
                             PickerType::Time => {
                                 if ctx.props().is_range {
-                                    let tmp_s: Vec<&str> =
-                                        format_str.as_str().split('-').collect();
+                                    let tmp_s: Vec<&str> = format_str.as_str().split('-').collect();
                                     if tmp_s.len() != 2 {
                                         return false;
                                     }
-                                    let start_str = format!("{} {}", TIMESTAMP_DATE_START, tmp_s[0].trim());
-                                    let end_str = format!("{} {}", TIMESTAMP_DATE_START, tmp_s[1].trim());
-                                    if let (Ok(start_t), Ok(end_t)) = 
-                                        (NaiveDateTime::parse_from_str(start_str.as_str(), DATE_TIME_FORMAT), NaiveDateTime::parse_from_str(end_str.as_str(), DATE_TIME_FORMAT)) {
-                                        let start = start_t.and_utc().timestamp_millis() as u64;
-                                        let end = end_t.and_utc().timestamp_millis() as u64;
+                                    if let (Ok(start_time), Ok(end_time)) = (
+                                        NaiveTime::parse_from_str(tmp_s[0].trim(), TIME_FORMAT),
+                                        NaiveTime::parse_from_str(tmp_s[1].trim(), TIME_FORMAT)
+                                    ) {
+                                        let start = (start_time.num_seconds_from_midnight() * 1000) as u64;
+                                        let end = (end_time.num_seconds_from_midnight() * 1000) as u64;
                                         ctx.props().on_date_picked.emit((start, end));
                                     }
                                 } else {
-                                    let start_str = format!("{} {}", TIMESTAMP_DATE_START, s);
-                                    if let Ok(start_t) = NaiveDateTime::parse_from_str(start_str.as_str(), DATE_TIME_FORMAT) {
-                                        let start = start_t.and_utc().timestamp_millis() as u64;
-                                        ctx.props()
-                                            .on_date_picked
-                                            .emit((start, start + 24 * 60 * 60 * 1000 - 1));
+                                    if let Ok(start_time) = NaiveTime::parse_from_str(format_str.trim(), TIME_FORMAT) {
+                                        let start = (start_time.num_seconds_from_midnight() * 1000) as u64;
+                                        ctx.props().on_date_picked.emit((start, start + TIME_MAX - 1));
                                     }
                                 }
                             }
