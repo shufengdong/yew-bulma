@@ -217,12 +217,12 @@ pub async fn async_ws_post_no_resp(url: &str, header: &Headers, value: Option<Js
     Ok(resp.ok())
 }
 
-pub async fn async_ws_post_file_no_resp(url: &str, header: &Headers, file: web_sys::File) -> Result<bool, FetchError> {
+pub async fn async_ws_post_file_no_resp(url: &str, header: &Headers, file: &web_sys::File) -> Result<bool, FetchError> {
     let opts = RequestInit::new();
     opts.set_method("POST");
 
     let form_data = FormData::new()?;
-    form_data.append_with_blob("file", &file)?;
+    form_data.append_with_blob("file", file)?;
     opts.set_body(&JsValue::from(form_data));
     opts.set_headers(header);
 
