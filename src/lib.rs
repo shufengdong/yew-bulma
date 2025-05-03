@@ -217,12 +217,12 @@ pub async fn async_ws_post_no_resp(url: &str, header: &Headers, value: Option<Js
     Ok(resp.ok())
 }
 
-pub async fn async_ws_post_file_no_resp(url: &str, header: &Headers, file: web_sys::File) -> Result<bool, FetchError> {
+pub async fn async_ws_post_file_no_resp(url: &str, header: &Headers, file: &web_sys::File) -> Result<bool, FetchError> {
     let opts = RequestInit::new();
     opts.set_method("POST");
 
     let form_data = FormData::new()?;
-    form_data.append_with_blob("file", &file)?;
+    form_data.append_with_blob("file", file)?;
     opts.set_body(&JsValue::from(form_data));
     opts.set_headers(header);
 
@@ -233,6 +233,29 @@ pub async fn async_ws_post_file_no_resp(url: &str, header: &Headers, file: web_s
     check_resp(&resp).await?;
     Ok(resp.ok())
 }
+
+
+pub async fn async_ws_post_file(url: &str, header: &Headers, file: &web_sys::File) -> Result<Vec<u8>, FetchError> {
+    let opts = RequestInit::new();
+    opts.set_method("POST");
+
+    let form_data = FormData::new()?;
+    form_data.append_with_blob("file", file)?;
+    opts.set_body(&JsValue::from(form_data));
+    opts.set_headers(header);
+
+    let request = Request::new_with_str_and_init(url, &opts)?;
+    let window = web_sys::window().unwrap();
+    let resp_value = JsFuture::from(window.fetch_with_request(&request)).await?;
+    let resp: Response = resp_value.dyn_into()?;
+    check_resp(&resp).await?;
+    let bytes = JsFuture::from(resp.array_buffer()?).await?;
+    let abuf = bytes.dyn_into::<js_sys::ArrayBuffer>()?;
+    let array = js_sys::Uint8Array::new(&abuf);
+    let vec: Vec<u8> = array.to_vec();
+    Ok(vec)
+}
+
 
 pub async fn async_ws_put(url: &str, header: &Headers, value: Option<JsValue>) -> Result<Vec<u8>, FetchError> {
     let opts = RequestInit::new();
