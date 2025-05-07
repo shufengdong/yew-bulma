@@ -15,3 +15,4 @@ pub mod mypagination;
 // added by zxy
 pub mod myrownumdp;
 pub mod mylist;
+pub mod myloading;
