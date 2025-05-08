@@ -1,4 +1,5 @@
 use yew::prelude::*;
+use yew_agent::{Bridge, Bridged};
 use crate::*;
 
 #[derive(Clone, Debug, PartialEq, Properties)]
@@ -10,10 +11,13 @@ pub struct Props {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum Msg {
     Show,
-    Hide
+    Hide,
+    None,
 }
 pub struct MyLoading {
     is_loading: bool,
+    /// 消息总线
+    _subscription: Box<dyn Bridge<MyEventBus>>,
 }
 
 impl Component for MyLoading {
@@ -21,7 +25,18 @@ impl Component for MyLoading {
     type Properties = Props;
 
     fn create(ctx: &Context<Self>) -> Self {
+        let cb = {
+            let link = ctx.link().clone();
+            move |msg| {
+                link.send_message(match msg {
+                    MyMsg::Loading(message) => message,
+                    _ => Msg::None,
+                })
+            }
+        };
+        let _subscription = MyEventBus::bridge(std::rc::Rc::new(cb));
         Self {
+            _subscription,
             is_loading: ctx.props().is_loading,
         }
     }
@@ -35,6 +50,9 @@ impl Component for MyLoading {
             Msg::Hide => {
                 self.is_loading = false;
                 return true;
+            }
+            Msg::None => {
+                return false;
             }
         }
     }
