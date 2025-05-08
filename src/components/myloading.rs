@@ -9,7 +9,7 @@ pub struct Props {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
-pub enum Msg {
+pub enum LoadingMsg {
     Show,
     Hide,
     None,
@@ -21,7 +21,7 @@ pub struct MyLoading {
 }
 
 impl Component for MyLoading {
-    type Message = Msg;
+    type Message = LoadingMsg;
     type Properties = Props;
 
     fn create(ctx: &Context<Self>) -> Self {
@@ -30,7 +30,7 @@ impl Component for MyLoading {
             move |msg| {
                 link.send_message(match msg {
                     MyMsg::Loading(message) => message,
-                    _ => Msg::None,
+                    _ => LoadingMsg::None,
                 })
             }
         };
@@ -43,15 +43,15 @@ impl Component for MyLoading {
 
     fn update(&mut self, _: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            Msg::Show => {
+            LoadingMsg::Show => {
                 self.is_loading = true;
                 return true;
             }
-            Msg::Hide => {
+            LoadingMsg::Hide => {
                 self.is_loading = false;
                 return true;
             }
-            Msg::None => {
+            LoadingMsg::None => {
                 return false;
             }
         }

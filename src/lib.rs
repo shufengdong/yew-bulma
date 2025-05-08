@@ -579,7 +579,7 @@ pub enum MyMsg {
     Dropdown(DropdownMsg),
     #[cfg(feature = "chart")]
     ChartMsg(chart::chartcard::Msg),
-    Loading(components::myloading::Msg),
+    Loading(components::myloading::LoadingMsg),
 }
 
 #[derive(Clone, Debug)]
