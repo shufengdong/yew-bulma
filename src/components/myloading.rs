@@ -7,7 +7,10 @@ pub struct Props {
     pub is_loading: bool,
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum Msg {
+    Show,
+    Hide
 }
 pub struct MyLoading {
     is_loading: bool,
@@ -20,6 +23,19 @@ impl Component for MyLoading {
     fn create(ctx: &Context<Self>) -> Self {
         Self {
             is_loading: ctx.props().is_loading,
+        }
+    }
+
+    fn update(&mut self, _: &Context<Self>, msg: Self::Message) -> bool {
+        match msg {
+            Msg::Show => {
+                self.is_loading = true;
+                return true;
+            }
+            Msg::Hide => {
+                self.is_loading = false;
+                return true;
+            }
         }
     }
 
