@@ -121,6 +121,7 @@ impl Component for FileTree {
     type Properties = Props;
 
     fn create(ctx: &Context<Self>) -> Self {
+        let debug_start = js_sys::Date::now();
         let tree_id = ctx.props().tree_id.clone();
         let local_storage = window().local_storage().unwrap().unwrap();
         let folder_unexpanded = if !tree_id.is_empty() {
@@ -181,6 +182,8 @@ impl Component for FileTree {
             current_pagination: 1,
         };
         file_tree.update_path_in_tree_view();
+        let elapsed = js_sys::Date::now() - debug_start;
+        log::debug!("设备树filetree组件create耗时: {}ms", elapsed);
         file_tree
     }
 
@@ -371,7 +374,10 @@ impl Component for FileTree {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         let link = ctx.link();
+        let debug_start = js_sys::Date::now();
         let tree = self.build_tree_html(ctx);
+        let elapsed = js_sys::Date::now() - debug_start;
+        log::debug!("设备树filetree组件build_tree_html耗时: {}ms", elapsed);
         let to_find = if let Some(input) = self.find_input_ref.cast::<HtmlInputElement>() {
             input.value()
         } else {
