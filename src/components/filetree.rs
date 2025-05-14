@@ -122,6 +122,7 @@ impl Component for FileTree {
 
     fn create(ctx: &Context<Self>) -> Self {
         let debug_start = js_sys::Date::now();
+        log::debug!("设备树filetree组件create开始……");
         let tree_id = ctx.props().tree_id.clone();
         let local_storage = window().local_storage().unwrap().unwrap();
         let folder_unexpanded = if !tree_id.is_empty() {
@@ -375,6 +376,7 @@ impl Component for FileTree {
     fn view(&self, ctx: &Context<Self>) -> Html {
         let link = ctx.link();
         let debug_start = js_sys::Date::now();
+        log::debug!("设备树filetree组件build_tree_html开始……");
         let tree = self.build_tree_html(ctx);
         let elapsed = js_sys::Date::now() - debug_start;
         log::debug!("设备树filetree组件build_tree_html耗时: {}ms", elapsed);
