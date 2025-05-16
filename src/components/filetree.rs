@@ -119,7 +119,7 @@ impl Component for FileTree {
 
     fn create(ctx: &Context<Self>) -> Self {
         let debug_start = js_sys::Date::now();
-        debug!("设备树组件create开始……");
+        debug!("文件树组件create开始……");
         let tree_id = ctx.props().tree_id.clone();
         let local_storage = window().local_storage().unwrap().unwrap();
         let folder_unexpanded = if !tree_id.is_empty() {
@@ -180,7 +180,7 @@ impl Component for FileTree {
         };
         file_tree.update_path_in_tree_view();
         let elapsed = js_sys::Date::now() - debug_start;
-        debug!("设备树组件create耗时: {}ms", elapsed);
+        debug!("文件树组件create耗时: {}ms", elapsed);
         file_tree
     }
 
@@ -362,10 +362,10 @@ impl Component for FileTree {
     fn changed(&mut self, ctx: &Context<Self>, old_props: &Self::Properties) -> bool {
         if old_props.paths != ctx.props().paths {
             let debug_start = js_sys::Date::now();
-            debug!("设备树组件update_graph开始……");
+            debug!("文件树组件update_graph开始……");
             self.update_graph(ctx, &ctx.props().paths);
             let elapsed = js_sys::Date::now() - debug_start;
-            debug!("设备树组件update_graph耗时: {}ms", elapsed);
+            debug!("文件树组件update_graph耗时: {}ms", elapsed);
         }
         if old_props.selected.is_some() && old_props.selected == self.selected {
             self.selected = None;
@@ -376,10 +376,10 @@ impl Component for FileTree {
     fn view(&self, ctx: &Context<Self>) -> Html {
         let link = ctx.link();
         let debug_start = js_sys::Date::now();
-        debug!("设备树组件build_tree_html开始……");
+        debug!("文件树组件build_tree_html开始……");
         let tree = self.build_tree_html(ctx);
         let elapsed = js_sys::Date::now() - debug_start;
-        debug!("设备树组件build_tree_html耗时: {}ms", elapsed);
+        debug!("文件树组件build_tree_html耗时: {}ms", elapsed);
         let to_find = if let Some(input) = self.find_input_ref.cast::<HtmlInputElement>() {
             input.value()
         } else {
