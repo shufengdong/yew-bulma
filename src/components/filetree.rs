@@ -5,7 +5,6 @@ use log::debug;
 use petgraph::prelude::*;
 use petgraph::stable_graph::EdgeReference;
 use serde::{Deserialize, Serialize};
-use wasm_bindgen::prelude::*;
 
 use web_sys::{Event, HtmlElement};
 use yew::prelude::*;
@@ -102,8 +101,6 @@ pub struct FileTree {
     root_index: NodeIndex,
     /// 下一个edge的id
     next_edge_id: usize,
-    /// 用于保存回调函数
-    listeners: HashMap<String, Closure<dyn Fn(Event)>>,
     /// 消息总线
     _producer: Box<dyn Bridge<MyEventBus>>,
     /// 不启用路由时的本地路径存储
@@ -122,7 +119,7 @@ impl Component for FileTree {
 
     fn create(ctx: &Context<Self>) -> Self {
         let debug_start = js_sys::Date::now();
-        log::debug!("设备树filetree组件create开始……");
+        debug!("设备树组件create开始……");
         let tree_id = ctx.props().tree_id.clone();
         let local_storage = window().local_storage().unwrap().unwrap();
         let folder_unexpanded = if !tree_id.is_empty() {
@@ -172,7 +169,6 @@ impl Component for FileTree {
             graph,
             root_index,
             next_edge_id,
-            listeners: HashMap::default(),
             selected: ctx.props().selected.clone(),
             find_start: None,
             checked: HashSet::new(),
@@ -184,7 +180,7 @@ impl Component for FileTree {
         };
         file_tree.update_path_in_tree_view();
         let elapsed = js_sys::Date::now() - debug_start;
-        log::debug!("设备树filetree组件create耗时: {}ms", elapsed);
+        debug!("设备树组件create耗时: {}ms", elapsed);
         file_tree
     }
 
@@ -365,7 +361,11 @@ impl Component for FileTree {
 
     fn changed(&mut self, ctx: &Context<Self>, old_props: &Self::Properties) -> bool {
         if old_props.paths != ctx.props().paths {
+            let debug_start = js_sys::Date::now();
+            debug!("设备树组件update_graph开始……");
             self.update_graph(ctx, &ctx.props().paths);
+            let elapsed = js_sys::Date::now() - debug_start;
+            debug!("设备树组件update_graph耗时: {}ms", elapsed);
         }
         if old_props.selected.is_some() && old_props.selected == self.selected {
             self.selected = None;
@@ -376,10 +376,10 @@ impl Component for FileTree {
     fn view(&self, ctx: &Context<Self>) -> Html {
         let link = ctx.link();
         let debug_start = js_sys::Date::now();
-        log::debug!("设备树filetree组件build_tree_html开始……");
+        debug!("设备树组件build_tree_html开始……");
         let tree = self.build_tree_html(ctx);
         let elapsed = js_sys::Date::now() - debug_start;
-        log::debug!("设备树filetree组件build_tree_html耗时: {}ms", elapsed);
+        debug!("设备树组件build_tree_html耗时: {}ms", elapsed);
         let to_find = if let Some(input) = self.find_input_ref.cast::<HtmlInputElement>() {
             input.value()
         } else {
