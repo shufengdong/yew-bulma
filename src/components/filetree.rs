@@ -14,6 +14,7 @@ use yew_agent::{Bridge, Bridged};
 use crate::components::mypagination::MyPagination;
 use crate::components::myrownumdp::MyRowNumDP;
 use crate::*;
+use crate::calendar::get_timestamp;
 
 pub const UI_TEXT_IDS: [&str; 2] = ["same_path_note", "search_tree_node"];
 
@@ -947,4 +948,17 @@ fn test_tree_string_gen() {
     let (graph, _, _) = create_graph(&v);
     assert_eq!(graph.node_count(), 18);
     assert_eq!(graph.edge_count(), 17);
+}
+
+#[test]
+fn test_big_graph() {
+    let cap = 20000;
+    let mut v = Vec::with_capacity(cap);
+    for i in 0..cap {
+        v.push(format!("a/b/c/cc{i}"));
+    }
+    let time = get_timestamp();
+    let (_, _, _) = create_graph(&v);
+    let elapsed = get_timestamp() - time;
+    println!("大图生成耗时: {}ms", elapsed);
 }
