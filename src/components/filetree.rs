@@ -361,11 +361,7 @@ impl Component for FileTree {
 
     fn changed(&mut self, ctx: &Context<Self>, old_props: &Self::Properties) -> bool {
         if old_props.paths != ctx.props().paths {
-            let debug_start = js_sys::Date::now();
-            debug!("文件树组件update_graph开始……");
             self.update_graph(ctx, &ctx.props().paths);
-            let elapsed = js_sys::Date::now() - debug_start;
-            debug!("文件树组件update_graph耗时: {}ms", elapsed);
         }
         if old_props.selected.is_some() && old_props.selected == self.selected {
             self.selected = None;
@@ -837,13 +833,21 @@ impl FileTree {
         } else {
             all_paths
         };
+        let debug_start = js_sys::Date::now();
+        debug!("文件树组件update_graph开始……");
         let (graph, root_index, next_edge_id) = create_graph(paths);
+        let elapsed = js_sys::Date::now() - debug_start;
+        debug!("文件树组件update_graph耗时: {}ms", elapsed);
         self.selected = ctx.props().selected.clone();
         self.graph = graph;
         self.root_index = root_index;
         self.next_edge_id = next_edge_id;
         self.current_pagination = 1;
+        let debug_start = js_sys::Date::now();
+        debug!("文件树组件update_path_in_tree_view开始……");
         self.update_path_in_tree_view();
+        let elapsed = js_sys::Date::now() - debug_start;
+        debug!("文件树组件update_path_in_tree_view耗时: {}ms", elapsed);
     }
 
     fn create_show_tree(&self, ctx: &Context<Self>) -> (DiGraph<String, usize>, NodeIndex) {
