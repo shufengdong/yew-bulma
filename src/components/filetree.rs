@@ -912,8 +912,8 @@ fn create_graph(paths: &[String]) -> (StableDiGraph<String, usize>, NodeIndex, u
                 let current_index = graph.add_node(node.into());
                 graph.add_edge(father_index, current_index, edge_id);
                 edge_id += 1;
-                father_index = current_index;
                 if i != nodes.len() - 1 {
+                    father_index = current_index;
                     assit_set.insert(node, current_index);    
                 }
             }
