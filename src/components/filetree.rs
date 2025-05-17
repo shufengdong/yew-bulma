@@ -898,30 +898,22 @@ impl FileTree {
 fn create_graph(paths: &[String]) -> (StableDiGraph<String, usize>, NodeIndex, usize) {
     // 构造树结构
     let mut graph = StableDiGraph::new();
+    let mut assit_set: HashMap<&str, NodeIndex> =  HashMap::with_capacity(paths.len());
     let root_index = graph.add_node("root".into());
     let mut edge_id = 0;
     for p in paths {
         let nodes: Vec<&str> = p.split('/').collect();
         let mut father_index = root_index;
         for node in nodes {
-            let mut is_exist = false;
-            for edge in graph.edges(father_index) {
-                let son_index = edge.target();
-                if let Some(name) = graph.node_weight(son_index) {
-                    if name == node {
-                        is_exist = true;
-                        father_index = son_index;
-                        break;
-                    }
-                }
+            if let Some(son_index) = assit_set.get(node) {
+                father_index = *son_index;
+            } else {
+                let current_index = graph.add_node(node.into());
+                graph.add_edge(father_index, current_index, edge_id);
+                edge_id += 1;
+                father_index = current_index;
+                assit_set.insert(node, current_index);
             }
-            if is_exist {
-                continue;
-            }
-            let current_index = graph.add_node(node.into());
-            graph.add_edge(father_index, current_index, edge_id);
-            edge_id += 1;
-            father_index = current_index;
         }
     }
     (graph, root_index, edge_id)
