@@ -904,7 +904,8 @@ fn create_graph(paths: &[String]) -> (StableDiGraph<String, usize>, NodeIndex, u
     for p in paths {
         let nodes: Vec<&str> = p.split('/').collect();
         let mut father_index = root_index;
-        for node in nodes {
+        for i in 0..nodes.len() {
+            let node = nodes[i];
             if let Some(son_index) = assit_set.get(node) {
                 father_index = *son_index;
             } else {
@@ -912,7 +913,9 @@ fn create_graph(paths: &[String]) -> (StableDiGraph<String, usize>, NodeIndex, u
                 graph.add_edge(father_index, current_index, edge_id);
                 edge_id += 1;
                 father_index = current_index;
-                assit_set.insert(node, current_index);
+                if i != nodes.len() - 1 {
+                    assit_set.insert(node, current_index);    
+                }
             }
         }
     }
@@ -944,7 +947,7 @@ fn test_tree_string_gen() {
 
 #[test]
 fn test_big_graph() {
-    let cap = 20000;
+    let cap = 100000;
     let mut v = Vec::with_capacity(cap);
     for i in 0..cap {
         v.push(format!("a/b/c/cc{i}"));
