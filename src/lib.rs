@@ -620,6 +620,10 @@ impl yew_agent::Worker for MyEventBus {
     fn name_of_resource() -> &'static str {
         "bulma-worker.js"
     }
+      
+    fn resource_path_is_relative() -> bool {
+        true
+    }
 }
 
 pub fn create_table_div(table_head: Html, table_body: Html) -> Html {
