@@ -178,7 +178,7 @@ impl Component for FileTree {
             _producer: MyEventBus::bridge(std::rc::Rc::new(cb)),
             current_pagination: 1,
         };
-        file_tree.update_path_in_tree_view();
+        file_tree.update_path_in_tree_view(None);
         let elapsed = js_sys::Date::now() - debug_start;
         debug!("文件树组件create耗时: {}ms", elapsed);
         file_tree
@@ -215,7 +215,7 @@ impl Component for FileTree {
                     self.selected = Some(path.clone());
                     ctx.props().on_selected.emit(path);
                 } else {
-                    self.update_path_in_tree_view();
+                    self.update_path_in_tree_view(Some(path));
                 }
                 return true;
             }
@@ -275,7 +275,7 @@ impl Component for FileTree {
                         name.clear();
                         name.push_str(&new_name);
                         self.selected = Some(new_path.clone());
-                        self.update_path_in_tree_view();
+                        self.update_path_in_tree_view(None);
                         let value = (old_path.clone(), new_path.clone());
                         ctx.props().on_change.emit(value);
                         ctx.props().on_selected.emit(new_path);
@@ -289,7 +289,7 @@ impl Component for FileTree {
                     self.selected = Some(new_path.clone());
                     ctx.props().on_selected.emit(new_path.clone());
                 }
-                self.update_path_in_tree_view();
+                self.update_path_in_tree_view(None);
                 ctx.props().on_add.emit(new_path);
                 return true;
             }
@@ -307,7 +307,7 @@ impl Component for FileTree {
                 let old_path = self.selected.as_ref().unwrap().clone();
                 self.replace(old_path.clone(), new_path.clone());
                 self.selected = Some(new_path.clone());
-                self.update_path_in_tree_view();
+                self.update_path_in_tree_view(None);
                 let value = (old_path.clone(), new_path.clone());
                 ctx.props().on_change.emit(value);
                 ctx.props().on_selected.emit(new_path);
@@ -663,7 +663,7 @@ impl FileTree {
                                 if let Some(w2) = self.graph.edge_weight_mut(edge_ids[i]) {
                                     *w2 = wj;
                                 }
-                                self.update_path_in_tree_view();
+                                self.update_path_in_tree_view(None);
                                 return true;
                             }
                         }
@@ -785,7 +785,7 @@ impl FileTree {
         Some(current_index)
     }
 
-    fn update_path_in_tree_view(&mut self) {
+    fn update_path_in_tree_view(&mut self, reposit_path: Option<String>) {
         let n = self.graph.node_count();
         let mut paths: HashMap<NodeIndex, String> = HashMap::with_capacity(n);
         let mut result = Vec::with_capacity(n / 2);
@@ -828,11 +828,23 @@ impl FileTree {
         }
         result.shrink_to_fit();
         self.local_paths = result;
-        // 收缩后，如果当前path总数已经小于树形的起始节点index，则自动定位到第一页，避免数组越界
-        // todo 可以进一步优化，定位到所操作的节点（不一定是selected）收缩后所在页码
-        let start = (self.current_pagination - 1) * self.row_num_per_page;
-        if start >= self.local_paths.len() {
-            self.current_pagination = 1;
+        self.reposit_path(reposit_path);
+    }
+
+    fn reposit_path(&mut self, reposit_path: Option<String>) {
+        if let Some(reposit_path) = &reposit_path {
+            // 重定位到操作节点所在页码
+            if let Some(index) = self.local_paths.iter().position(|x| x == reposit_path) {
+                self.current_pagination = index / self.row_num_per_page + 1;
+            } else {
+                self.current_pagination = 1;
+            }
+        } else {
+            // 收缩后，如果当前path总数已经小于树形的起始节点index，则自动定位到第一页，避免数组越界
+            let start = (self.current_pagination - 1) * self.row_num_per_page;
+            if start >= self.local_paths.len() {
+                self.current_pagination = 1;
+            }
         }
     }
 
@@ -855,7 +867,7 @@ impl FileTree {
         self.current_pagination = 1;
         let debug_start = js_sys::Date::now();
         debug!("文件树组件update_path_in_tree_view开始……");
-        self.update_path_in_tree_view();
+        self.update_path_in_tree_view(None);
         let elapsed = js_sys::Date::now() - debug_start;
         debug!("文件树组件update_path_in_tree_view耗时: {}ms", elapsed);
     }
