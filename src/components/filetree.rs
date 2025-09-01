@@ -188,8 +188,11 @@ impl Component for FileTree {
         match msg {
             Msg::LayoutClicked(path, is_icon) => {
                 // debug!("Path {} is selected.", path);
-                if let Some(b) = self.folder_unexpanded.value.get_mut(&path) {
-                    *b = !*b;
+                // 只有点击icon图标才进行树形收缩
+                if is_icon {
+                    if let Some(b) = self.folder_unexpanded.value.get_mut(&path) {
+                        *b = !*b;
+                    }
                 }
                 // 保存
                 if !ctx.props().tree_id.is_empty() {
@@ -207,12 +210,13 @@ impl Component for FileTree {
                         }
                     }
                 }
-                // 如果点击的是icon图标，则不进行选中操作
+                // 如果点击的是不是icon图标，则进行选中操作，否则刷新树形
                 if !is_icon {
                     self.selected = Some(path.clone());
                     ctx.props().on_selected.emit(path);
+                } else {
+                    self.update_path_in_tree_view();
                 }
-                self.update_path_in_tree_view();
                 return true;
             }
             Msg::LeafSelected(path) => {
@@ -824,6 +828,12 @@ impl FileTree {
         }
         result.shrink_to_fit();
         self.local_paths = result;
+        // 收缩后，如果当前path总数已经小于树形的起始节点index，则自动定位到第一页，避免数组越界
+        // todo 可以进一步优化，定位到所操作的节点（不一定是selected）收缩后所在页码
+        let start = (self.current_pagination - 1) * self.row_num_per_page;
+        if start >= self.local_paths.len() {
+            self.current_pagination = 1;
+        }
     }
 
     fn update_graph(&mut self, ctx: &Context<Self>, all_paths: &[String]) {
