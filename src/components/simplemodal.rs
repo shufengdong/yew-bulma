@@ -24,6 +24,8 @@ pub struct SimpleModalCardProps {
     pub classes: Option<Classes>,
     #[prop_or_default]
     pub width: Option<String>,
+    #[prop_or_default]
+    pub height: Option<String>,
     #[prop_or_else(Callback::noop)]
     pub on_button1_click: Callback<()>,
     #[prop_or_else(Callback::noop)]
@@ -80,16 +82,30 @@ impl Component for SimpleModalCard {
         classes.push("is-active");
         classes.push(&ctx.props().classes);
         let width = if let Some(w) = &ctx.props().width {
-            format!("width:{}px", w)
+            if w.parse::<u64>().is_ok() {
+                format!("width:{}px;", w)
+            } else {
+                format!("width:{};", w)
+            }
         } else {
-            "width:640px".to_string()
+            "width:640px;".to_string()
         };
+        let height = if let Some(h) = &ctx.props().height {
+            if h.parse::<u64>().is_ok() {
+                format!("height:{}px;", h)
+            } else {
+                format!("height:{};", h)
+            }
+        } else {
+            "".to_string()
+        };
+        let style = format!("{}{}", width, height);
         html! {
             <>
             if !need_hidden {
                 <div class={classes}>
                     <div class={"modal-background"} onclick={link.callback(move |_|Msg::Close)}></div>
-                    <div class={"modal-card"} style={width}>
+                    <div class={"modal-card"} style={style}>
                         <header class={"modal-card-head"}>
                             <p class={"modal-card-title"}>{ctx.props().title.clone()}</p>
                             <button aria-label="close" class="delete"
