@@ -105,6 +105,8 @@ pub struct FileTree {
     _producer: Box<dyn Bridge<MyEventBus>>,
     /// 不启用路由时的本地路径存储
     local_paths: Vec<String>,
+    /// 全局路径（用于摸索匹配时全局检索）
+    all_paths: Vec<String>,
     /// 搜索框
     find_input_ref: NodeRef,
     /// 每页行数
@@ -173,6 +175,7 @@ impl Component for FileTree {
             find_start: None,
             checked: HashSet::new(),
             local_paths: vec![],
+            all_paths: paths.to_vec(),
             find_input_ref: NodeRef::default(),
             row_num_per_page: page_now,
             _producer: MyEventBus::bridge(std::rc::Rc::new(cb)),
@@ -328,8 +331,32 @@ impl Component for FileTree {
                 if let Some(input) = self.find_input_ref.cast::<HtmlInputElement>() {
                     let to_find: String = input.value().trim().to_lowercase();
                     if !to_find.is_empty() {
+                        // 先从全局路径匹配，把包含未展开的节点全部展开
+                        self.all_paths
+                            .iter()
+                            .filter(|path| {
+                                if let Some(last) = path.split('/').last() {
+                                    last.to_lowercase().contains(&to_find)
+                                } else {
+                                    false
+                                }
+                            })
+                            .for_each(|path| {
+                                let parts: Vec<&str> = path.split('/').collect();
+                                // 路径上的所有节点都设置为展开（除了叶子节点）
+                                for i in 0..parts.len().saturating_sub(1) {
+                                    let sub_path = parts[..=i].join("/");
+                                    let _ = self.folder_unexpanded.value.insert(sub_path, false);
+                                }
+                            });
+                        self.update_path_in_tree_view(None);
                         for (i, path) in self.local_paths.iter().enumerate().skip(start) {
-                            if path.to_lowercase().contains(&to_find) {
+                            let is_find = if let Some(last) = path.split('/').last() {
+                                last.contains(&to_find)
+                            } else {
+                                false
+                            };
+                            if is_find {
                                 self.find_start = Some(i);
                                 self.selected = Some(path.clone());
                                 self.current_pagination = if self.row_num_per_page != 0 {
@@ -867,6 +894,7 @@ impl FileTree {
         self.root_index = root_index;
         self.next_edge_id = next_edge_id;
         self.current_pagination = 1;
+        self.all_paths = paths.to_vec();
         let debug_start = js_sys::Date::now();
         debug!("文件树组件update_path_in_tree_view开始……");
         self.update_path_in_tree_view(None);
