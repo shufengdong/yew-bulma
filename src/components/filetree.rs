@@ -88,8 +88,8 @@ pub struct Props {
     /// 默认展开级别
     #[prop_or_default]
     pub expanded_level: Option<usize>,
-    /// 再次选择是否取消选中（默认不false）
-    #[prop_or_default]
+    /// 再次选择是否取消选中（默认true）
+    #[prop_or_else(|| true)]
     pub reelect_cancel: bool,
 }
 
