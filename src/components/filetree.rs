@@ -369,6 +369,8 @@ impl Component for FileTree {
         }
         if old_props.selected.is_some() && old_props.selected == self.selected {
             self.selected = None;
+        } else if old_props.selected != ctx.props().selected {
+            self.selected = ctx.props().selected.clone();
         }
         true
     }
