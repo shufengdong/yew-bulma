@@ -356,7 +356,7 @@ impl Component for FileTree {
                         self.update_path_in_tree_view(None);
                         for (i, path) in self.local_paths.iter().enumerate().skip(start) {
                             let is_find = if let Some(last) = path.split('/').last() {
-                                last.contains(&to_find)
+                                last.to_lowercase().contains(&to_find)
                             } else {
                                 false
                             };
