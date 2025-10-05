@@ -85,6 +85,9 @@ pub struct Props {
     /// 默认选中的节点，不触发on_selected事件
     #[prop_or_default]
     pub selected: Option<String>,
+    /// 默认展开级别
+    #[prop_or_default]
+    pub expanded_level: Option<usize>,
 }
 
 pub struct FileTree {
@@ -181,6 +184,7 @@ impl Component for FileTree {
             _producer: MyEventBus::bridge(std::rc::Rc::new(cb)),
             current_pagination: 1,
         };
+        file_tree.do_expanded_level(ctx);
         file_tree.update_path_in_tree_view(None);
         let elapsed = js_sys::Date::now() - debug_start;
         debug!("文件树组件create耗时: {}ms", elapsed);
@@ -392,6 +396,8 @@ impl Component for FileTree {
 
     fn changed(&mut self, ctx: &Context<Self>, old_props: &Self::Properties) -> bool {
         if old_props.paths != ctx.props().paths {
+            self.all_paths = ctx.props().paths.to_vec();
+            self.do_expanded_level(ctx);
             self.update_graph(ctx, &ctx.props().paths);
         }
         if old_props.selected.is_some() && old_props.selected == self.selected {
@@ -894,7 +900,6 @@ impl FileTree {
         self.root_index = root_index;
         self.next_edge_id = next_edge_id;
         self.current_pagination = 1;
-        self.all_paths = paths.to_vec();
         let debug_start = js_sys::Date::now();
         debug!("文件树组件update_path_in_tree_view开始……");
         self.update_path_in_tree_view(None);
@@ -943,6 +948,20 @@ impl FileTree {
             }
         }
         (graph, root_index)
+    }
+
+    // 处理默认展开级别
+    fn do_expanded_level(&mut self, ctx: &Context<Self>) {
+        if let Some(expanded_level) = ctx.props().expanded_level {
+            for path in &self.all_paths {
+                let level = path.split('/').count();
+                if level == expanded_level {
+                    let _ = self.folder_unexpanded.value.insert(path.clone(), true);
+                } else if level < expanded_level {
+                    let _ = self.folder_unexpanded.value.insert(path.clone(), false);
+                }
+            }
+        }
     }
 }
 
