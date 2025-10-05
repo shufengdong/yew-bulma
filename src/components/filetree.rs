@@ -88,6 +88,9 @@ pub struct Props {
     /// 默认展开级别
     #[prop_or_default]
     pub expanded_level: Option<usize>,
+    /// 再次选择是否取消选中（默认不false）
+    #[prop_or_default]
+    pub reelect_cancel: bool,
 }
 
 pub struct FileTree {
@@ -400,7 +403,7 @@ impl Component for FileTree {
             self.do_expanded_level(ctx);
             self.update_graph(ctx, &ctx.props().paths);
         }
-        if old_props.selected.is_some() && old_props.selected == self.selected {
+        if ctx.props().reelect_cancel && old_props.selected.is_some() && old_props.selected == self.selected {
             self.selected = None;
         } else if old_props.selected != ctx.props().selected {
             self.selected = ctx.props().selected.clone();
