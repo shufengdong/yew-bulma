@@ -873,7 +873,11 @@ impl FileTree {
         if let Some(reposit_path) = &reposit_path {
             // 重定位到操作节点所在页码
             if let Some(index) = self.local_paths.iter().position(|x| x == reposit_path) {
-                self.current_pagination = index / self.row_num_per_page + 1;
+                if self.row_num_per_page == 0 {
+                    self.current_pagination = 1;
+                } else {
+                    self.current_pagination = index / self.row_num_per_page + 1;
+                }
             } else {
                 self.current_pagination = 1;
             }
