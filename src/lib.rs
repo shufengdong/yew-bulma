@@ -11,6 +11,7 @@ use bytes::BytesMut;
 use derive_more::Display;
 use gloo_utils::{document, window};
 use serde::{Deserialize, Serialize};
+use js_sys::Function;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::JsFuture;
@@ -78,6 +79,10 @@ pub const HEADER_PERMISSION_DENIED: &str = "permission-denied";
 #[wasm_bindgen]
 extern "C" {
     pub fn alert(s: &str);
+    #[wasm_bindgen(js_namespace = ["window"])]
+    fn my_alert_js(msg: &str, callback: &Function);
+    #[wasm_bindgen(js_namespace = ["window"])]
+    fn my_confirm_js(msg: &str, callback: &Function);
 }
 
 /// Common alignment classes.
@@ -635,6 +640,38 @@ pub fn create_table_div(table_head: Html, table_body: Html) -> Html {
             </Table>
         </div>
     }
+}
+
+/// 自定义的alert框
+/// 模拟window.alert弹窗，增加自定义样式
+pub fn my_alert(msg: &str) {
+    let cb = Function::new_no_args("");
+    my_alert_js(msg, &cb);
+}
+
+/// 自定义的alert框，带回调函数
+/// 模拟window.alert弹窗，增加自定义样式
+pub fn my_alert_with_callback<F>(msg: &str, callback: F)
+where
+    F: Fn() + 'static,
+{
+    let cb = Closure::wrap(Box::new(callback) as Box<dyn Fn()>);
+    my_alert_js(msg, cb.as_ref().unchecked_ref());
+    cb.forget();
+}
+
+/// 自定义的confirm确认框
+/// 模拟window.confirm确认框，增加自定义样式
+pub fn my_confirm<F>(msg: &str, callback: F)
+where
+    F: Fn(bool) + 'static,
+{
+    let cb = Closure::wrap(Box::new(move |val: JsValue| {
+        let ok = val.as_bool().unwrap_or(false);
+        callback(ok);
+    }) as Box<dyn FnMut(JsValue)>);
+    my_confirm_js(msg, cb.as_ref().unchecked_ref());
+    cb.forget();
 }
 
 #[cfg(test)]
