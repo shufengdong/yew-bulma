@@ -1,5 +1,5 @@
 use yew::prelude::*;
-use yew_agent::{Dispatched, Dispatcher};
+use yew_agent::scope_ext::{AgentScopeExt, WorkerBridgeHandle};
 
 use crate::*;
 
@@ -23,16 +23,16 @@ pub enum Msg {
 }
 
 pub struct MyRowNumDP {
-    event_bus: Dispatcher<MyEventBus>,
+    event_bus: WorkerBridgeHandle<MyEventBus>,
 }
 
 impl Component for MyRowNumDP {
     type Message = Msg;
     type Properties = Props;
 
-    fn create(_: &Context<Self>) -> Self {
+    fn create(ctx: &Context<Self>) -> Self {
         Self {
-            event_bus: MyEventBus::dispatcher()
+            event_bus: ctx.link().bridge_worker::<MyEventBus>(Callback::noop()),
         }
     }
 
@@ -46,6 +46,7 @@ impl Component for MyRowNumDP {
                 let close_msg =
                     MyMsg::Dropdown(DropdownMsg::CloseFromAgent(ctx.props().dp_id.clone()));
                 self.event_bus.send(close_msg);
+
                 ctx.props().on_select.emit(n);
                 true
             }

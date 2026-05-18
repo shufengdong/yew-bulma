@@ -6,7 +6,7 @@ use yew::prelude::*;
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct DeleteProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     /// The HTML tag to use for this component.
@@ -40,7 +40,7 @@ impl Component for Delete {
         let tag = ctx.props().tag.clone();
         html! {
             <@{tag} class={classes} onclick={ctx.props().onclick.clone()}>
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </@>
         }
     }

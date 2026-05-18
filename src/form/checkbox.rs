@@ -15,7 +15,7 @@ pub struct CheckboxProps {
     #[prop_or_default]
     pub onclick: Option<Callback<MouseEvent>>,
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     /// Disable this component.
@@ -66,7 +66,7 @@ impl Component for Checkbox {
                         onclick={onclick}
                         disabled={ctx.props().disabled}
                     />
-                    { for ctx.props().children.iter() }
+                    {ctx.props().children.clone()}
                 </a>
             </label>
         }

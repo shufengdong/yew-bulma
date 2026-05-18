@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use web_sys::{Event, HtmlElement};
 use yew::prelude::*;
 use yew::virtual_dom::VNode;
-use yew_agent::{Bridge, Bridged};
+use yew_agent::scope_ext::{AgentScopeExt, WorkerBridgeHandle};
 
 use crate::components::mypagination::MyPagination;
 use crate::components::myrownumdp::MyRowNumDP;
@@ -108,7 +108,7 @@ pub struct FileTree {
     /// 下一个edge的id
     next_edge_id: usize,
     /// 消息总线
-    _producer: Box<dyn Bridge<MyEventBus>>,
+    _producer: WorkerBridgeHandle<MyEventBus>,
     /// 不启用路由时的本地路径存储
     local_paths: Vec<String>,
     /// 全局路径（用于摸索匹配时全局检索）
@@ -157,20 +157,18 @@ impl Component for FileTree {
         };
         let (graph, root_index, next_edge_id) = create_graph(paths);
         let cb = {
-            let link = ctx.link().clone();
-            move |msg| {
-                link.send_message(match msg {
-                    MyMsg::FileTree(message) => message,
-                    MyMsg::FileTreeWithId(id, message) => {
-                        if id == tree_id {
-                            message
-                        } else {
-                            Msg::None
-                        }
+            let tree_id = tree_id.clone();
+            ctx.link().callback(move |msg: MyMsg| match msg {
+                MyMsg::FileTree(message) => message,
+                MyMsg::FileTreeWithId(id, message) => {
+                    if id == tree_id {
+                        message
+                    } else {
+                        Msg::None
                     }
-                    _ => Msg::None,
-                })
-            }
+                }
+                _ => Msg::None,
+            })
         };
         let mut file_tree = FileTree {
             folder_unexpanded,
@@ -184,7 +182,7 @@ impl Component for FileTree {
             all_paths: paths.to_vec(),
             find_input_ref: NodeRef::default(),
             row_num_per_page: page_now,
-            _producer: MyEventBus::bridge(std::rc::Rc::new(cb)),
+            _producer: ctx.link().bridge_worker::<MyEventBus>(cb),
             current_pagination: 1,
         };
         file_tree.do_expanded_level(ctx);
@@ -492,51 +490,49 @@ impl FileTree {
     }
 
     fn build_tree_html(&self, ctx: &Context<Self>) -> VNode {
-        let link = ctx.link();
-        // 是否多选
-        let is_multiple = if let Some(v) = ctx.props().is_multiple {
-            v
-        } else {
-            false
-        };
-        // 存储element的map
-        let mut top_ele = html! {<aside class={"menu filetree"} />};
-        let root_ul = html! {<ul class={"menu-list"} />};
+        let is_multiple = ctx.props().is_multiple.unwrap_or(false);
         // 生成树，不包含收起的节点
         let (tree, root_index) = self.create_show_tree(ctx);
-        // id前缀，用于一个页面同时存在多棵树时，区分不同树
-        let id_prefix = &ctx.props().tree_id;
-        // 存储节点对应的path
-        let mut paths = HashMap::with_capacity(tree.node_count());
-        let mut stack2 = Vec::with_capacity(tree.node_count());
-        let mut node_pos = HashMap::with_capacity(tree.node_count());
-        let mut stack = Vec::new();
-        // 先先把根节点放进去
-        stack.push((root_index, root_ul));
-        // 开始深度优先遍历
-        while let Some((node_index, current_node)) = stack.pop() {
-            let mut edges: Vec<petgraph::graph::EdgeReference<usize>> = tree.edges(node_index).collect();
-            if edges.len() > 0 {
-                node_pos.insert(node_index, stack2.len());
-            }
-            stack2.push((node_index, current_node));
-            // 进行排序
-            edges.sort_by(|a, b| a.weight().cmp(b.weight()));
-            for edge in edges {
+        let id_prefix = ctx.props().tree_id.clone();
+        let children = self.build_child_lis(ctx, &tree, root_index, None, &id_prefix, is_multiple);
+        html! {
+            <aside class={"menu filetree"}>
+                <ul class={"menu-list"}>
+                    {children}
+                </ul>
+            </aside>
+        }
+    }
+
+    /// 递归构造 `parent_index` 的所有子节点 `<li>`，并在每个 `<li>` 末尾嵌入其孙子的 `<ul>`。
+    fn build_child_lis(
+        &self,
+        ctx: &Context<Self>,
+        tree: &petgraph::graph::DiGraph<String, usize>,
+        parent_index: NodeIndex,
+        parent_path: Option<&str>,
+        id_prefix: &str,
+        is_multiple: bool,
+    ) -> Html {
+        let link = ctx.link();
+        let mut edges: Vec<petgraph::graph::EdgeReference<usize>> =
+            tree.edges(parent_index).collect();
+        // 按权重排序
+        edges.sort_by(|a, b| a.weight().cmp(b.weight()));
+        edges
+            .into_iter()
+            .map(|edge| {
                 let child_index = edge.target();
                 let child_name = tree.node_weight(child_index).unwrap();
-                let path = if let Some(father_id) = paths.get(&node_index) {
-                    format!("{father_id}/{child_name}")
-                } else {
-                    // 根节点下面的节点
-                    child_name.to_string()
+                let path = match parent_path {
+                    Some(p) => format!("{p}/{child_name}"),
+                    None => child_name.to_string(),
                 };
-                paths.insert(child_index, path.clone());
                 let id = format!("{id_prefix}_{path}");
-                // 生成对应的element
+                // 生成对应的 icon
                 let i_node = if let Some(t) = ctx.props().type_map.get(&path) {
                     if let Some(s) = ctx.props().icon_map.get(t) {
-                        html! {<i class={s}></i>}
+                        html! {<i class={s.clone()}></i>}
                     } else if let Some(b) = self.folder_unexpanded.value.get(&path) {
                         if *b {
                             html! {<i class={"fa fa-folder"}></i>}
@@ -556,9 +552,17 @@ impl FileTree {
                     html! {}
                 };
 
+                // 递归构建孙子节点；如果有则用 <ul> 包起来作为本 <li> 的尾子节点
+                let grand_lis =
+                    self.build_child_lis(ctx, tree, child_index, Some(&path), id_prefix, is_multiple);
+                let children_ul = if tree.edges(child_index).next().is_some() {
+                    html! { <ul>{grand_lis}</ul> }
+                } else {
+                    Html::default()
+                };
+
                 // 是否需要复选框
                 let need_checkbox = if is_multiple {
-                    // 是否满足路径约束
                     if let Some(paths) = &ctx.props().path_constraint {
                         paths.contains(&path)
                     } else {
@@ -568,15 +572,11 @@ impl FileTree {
                     false
                 };
                 let is_active = if let Some(selected) = &self.selected {
-                    if path == *selected {
-                        "is-active"
-                    } else {
-                        ""
-                    }
+                    if path == *selected { "is-active" } else { "" }
                 } else {
                     ""
                 };
-                let li = if need_checkbox {
+                if need_checkbox {
                     // 复选框情况下的html构成
                     let is_checked = self.checked.contains(&path);
                     html! {
@@ -589,9 +589,10 @@ impl FileTree {
                                 </a>
                                 <a id={id} class={format!("filetree-node with-check {is_active}")}>
                                     {i_node}
-                                    <span>{child_name}</span>
+                                    <span>{child_name.clone()}</span>
                                 </a>
                             </div>
+                            {children_ul}
                         </li>
                     }
                 } else {
@@ -606,63 +607,35 @@ impl FileTree {
                         <li>
                             if cross_constraint && !self.folder_unexpanded.value.contains_key(&path) {
                                 <a id={id} class={format!("filetree-node {is_active}")}
-                                     onclick={link.callback(move |_| Msg::LeafSelected(path.clone()))} >
+                                     onclick={link.callback({
+                                        let path = path.clone();
+                                        move |_| Msg::LeafSelected(path.clone())
+                                     })} >
                                     {i_node}
-                                    <span>{child_name}</span>
+                                    <span>{child_name.clone()}</span>
                                 </a>
                             } else if self.folder_unexpanded.value.contains_key(&path) {
                                 <a id={id} class={format!("filetree-node {is_active}")}
-                                     onclick={link.callback(move |e: MouseEvent| Msg::LayoutClicked(path.clone(),
-                                            e.target_unchecked_into::<HtmlElement>().class_name().starts_with("fa fa-")))} >
+                                     onclick={link.callback({
+                                        let path = path.clone();
+                                        move |e: MouseEvent| Msg::LayoutClicked(path.clone(),
+                                            e.target_unchecked_into::<HtmlElement>().class_name().starts_with("fa fa-"))
+                                     })} >
                                     {i_node}
-                                    <span>{child_name}</span>
+                                    <span>{child_name.clone()}</span>
                                 </a>
                             } else {
                                 <a id={id} class={format!("filetree-node {is_active}")}>
                                     {i_node}
-                                    <span>{child_name}</span>
+                                    <span>{child_name.clone()}</span>
                                 </a>
                             }
+                            {children_ul}
                         </li>
                     }
-                };
-                stack.push((child_index, li));
-            }
-        }
-        let mut node_ul: HashMap<NodeIndex, VNode> = HashMap::new();
-        while stack2.len() > 1 {
-            let (node_index, mut current_node) = stack2.pop().unwrap();
-            let edges = tree.edges_directed(node_index, Incoming);
-            if let Some(ul) = node_ul.remove(&node_index) {
-                if let VNode::VTag(father) = &mut current_node {
-                    father.add_child(ul);
                 }
-            }
-            for edge in edges {
-                let father_pos = node_pos.get(&edge.source()).unwrap();
-                if let VNode::VTag(father) = &mut stack2[*father_pos].1 {
-                    if let Some(ul) = node_ul.get_mut(&edge.source()) {
-                        if let VNode::VTag(ul) = ul {
-                            ul.add_child(current_node);
-                        }
-                    } else if father.tag() == "li" {
-                        let mut ul = html! {<ul />};
-                        if let VNode::VTag(v) = &mut ul {
-                            v.add_child(current_node);
-                        }
-                        node_ul.insert(edge.source(), ul);
-                    } else {
-                        father.add_child(current_node);
-                    }
-                    break;
-                }
-            }
-        }
-        let (_, root_ul) = stack2.pop().unwrap();
-        if let VNode::VTag(father) = &mut top_ele {
-            father.add_child(root_ul);
-        }
-        top_ele
+            })
+            .collect()
     }
 
     fn move_node(&mut self, is_up: bool) -> bool {

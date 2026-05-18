@@ -182,7 +182,7 @@ impl Component for MyPagination {
                     <PaginationItem item_type={PaginationItemType::Link}
                         is_current={current_page == last_page}
                         onclick={link.callback(move |_| Msg::ChangePagination(last_page))}>
-                        {last_page}
+                        {last_page.to_string()}
                     </PaginationItem>
                     </>
                 };
@@ -255,7 +255,7 @@ impl Component for MyPagination {
                     <PaginationItem item_type={PaginationItemType::Link}
                         is_current={current_page == last_page}
                         onclick={link.callback(move |_| Msg::ChangePagination(last_page))}>
-                        {last_page}
+                        {last_page.to_string()}
                     </PaginationItem>
                     </>
                 };

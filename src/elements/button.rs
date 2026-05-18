@@ -8,7 +8,7 @@ pub use router::{ButtonAnchorRouter, ButtonRouter, ButtonRouterProps};
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct ButtonsProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     /// The size for all buttons within this group.
@@ -41,7 +41,7 @@ impl Component for Buttons {
         }
         html! {
             <div class={classes}>
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </div>
         }
     }
@@ -67,7 +67,7 @@ pub enum ButtonGroupSize {
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct ButtonProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     /// The click handler to use for this component.
@@ -128,7 +128,7 @@ impl Component for Button {
         if ctx.props().disabled {
             html! {
                 <button class={classes} disabled={ctx.props().disabled} title={ctx.props().title.clone()}>
-                    { for ctx.props().children.iter() }
+                    {ctx.props().children.clone()}
                 </button>
             }
         } else {
@@ -138,7 +138,7 @@ impl Component for Button {
                     onkeydown={ctx.props().onkeydown.clone()}
                     onkeyup={ctx.props().onkeyup.clone()}
                     disabled={ctx.props().disabled} title={ctx.props().title.clone()}>
-                    { for ctx.props().children.iter() }
+                    {ctx.props().children.clone()}
                 </button>
             }
         }
@@ -161,7 +161,7 @@ mod router {
         pub route: SW,
         /// Html inside the component.
         #[prop_or_default]
-        pub children: Children,
+        pub children: Html,
         /// Classes to be added to component.
         #[prop_or_default]
         pub classes: Option<Classes>,
@@ -277,7 +277,7 @@ mod router {
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct ButtonAnchorProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     /// The `href` attribute value to use for this component.
@@ -338,7 +338,7 @@ impl Component for ButtonAnchor {
                 target={ctx.props().target.clone().unwrap_or_default()}
                 disabled={ctx.props().disabled}
             >
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </a>
         }
     }

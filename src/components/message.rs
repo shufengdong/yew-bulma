@@ -3,7 +3,7 @@ use yew::prelude::*;
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct MessageProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
 }
@@ -30,7 +30,7 @@ impl Component for Message {
         classes.push(&ctx.props().classes);
         html! {
             <article class={classes}>
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </article>
         }
     }
@@ -42,7 +42,7 @@ impl Component for Message {
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct MessageHeaderProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
 }
@@ -69,7 +69,7 @@ impl Component for MessageHeader {
         classes.push(&ctx.props().classes);
         html! {
             <div class={classes}>
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </div>
         }
     }
@@ -81,7 +81,7 @@ impl Component for MessageHeader {
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct MessageBodyProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
 }
@@ -108,7 +108,7 @@ impl Component for MessageBody {
         classes.push(&ctx.props().classes);
         html! {
             <div class={classes}>
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </div>
         }
     }

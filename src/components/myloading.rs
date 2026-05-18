@@ -1,5 +1,5 @@
 use yew::prelude::*;
-use yew_agent::{Bridge, Bridged};
+use yew_agent::scope_ext::{AgentScopeExt, WorkerBridgeHandle};
 use crate::*;
 
 #[derive(Clone, Debug, PartialEq, Properties)]
@@ -17,7 +17,7 @@ pub enum LoadingMsg {
 pub struct MyLoading {
     is_loading: bool,
     /// 消息总线
-    _subscription: Box<dyn Bridge<MyEventBus>>,
+    _subscription: WorkerBridgeHandle<MyEventBus>,
 }
 
 impl Component for MyLoading {
@@ -25,16 +25,11 @@ impl Component for MyLoading {
     type Properties = Props;
 
     fn create(ctx: &Context<Self>) -> Self {
-        let cb = {
-            let link = ctx.link().clone();
-            move |msg| {
-                link.send_message(match msg {
-                    MyMsg::Loading(message) => message,
-                    _ => LoadingMsg::None,
-                })
-            }
-        };
-        let _subscription = MyEventBus::bridge(std::rc::Rc::new(cb));
+        let cb = ctx.link().callback(|msg: MyMsg| match msg {
+            MyMsg::Loading(message) => message,
+            _ => LoadingMsg::None,
+        });
+        let _subscription = ctx.link().bridge_worker::<MyEventBus>(cb);
         Self {
             _subscription,
             is_loading: ctx.props().is_loading,

@@ -7,7 +7,7 @@ use yew::prelude::*;
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct TileProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     /// The HTML tag to use for this component.
@@ -65,7 +65,7 @@ impl Component for Tile {
         }
         html! {
             <@{ctx.props().tag.clone()} class={classes}>
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </@>
         }
     }

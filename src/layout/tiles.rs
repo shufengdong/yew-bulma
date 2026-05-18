@@ -14,25 +14,16 @@ pub struct Tiles {
 impl Tiles {
     pub fn create_html(&self, mut nodes: HashMap<usize, VNode>) -> Html {
         let cells: Html = (0..self.class_str.len()).map(|i| {
-            let mut div = html! {
-                <div class={self.class_str[i].clone()} style={self.style_str[i].clone()} />
+            let child = match nodes.remove(&i) {
+                Some(node) if self.with_box => html! { <div class={"box"}>{node}</div> },
+                Some(node) => node,
+                None => Html::default(),
             };
-            if let Some(node) = nodes.remove(&i) {
-                if self.with_box {
-                    let mut box_node = html! { <div class={"box"} /> };
-                    if let VNode::VTag(father) = &mut box_node {
-                        father.add_child(node);
-                    }
-                    if let VNode::VTag(father) = &mut div {
-                        father.add_child(box_node);
-                    }
-                } else {
-                    if let VNode::VTag(father) = &mut div {
-                        father.add_child(node);
-                    }
-                }
+            html! {
+                <div class={self.class_str[i].clone()} style={self.style_str[i].clone()}>
+                    {child}
+                </div>
             }
-            div
         }).collect();
         html! {
             <div class="fixed-grid has-12-cols">

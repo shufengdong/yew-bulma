@@ -6,7 +6,7 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::Element;
 use yew::prelude::*;
-use yew_agent::{Dispatched, Dispatcher};
+use yew_agent::scope_ext::{AgentScopeExt, WorkerBridgeHandle};
 
 use crate::*;
 use crate::{MyEventBus, MyMsg};
@@ -85,7 +85,7 @@ pub enum Msg {
 }
 
 pub struct DatePicker {
-    event_bus: Dispatcher<MyEventBus>,
+    event_bus: WorkerBridgeHandle<MyEventBus>,
     ele_ref: NodeRef,
     listener: Option<Closure<dyn Fn(JsValue)>>,
 }
@@ -94,9 +94,9 @@ impl Component for DatePicker {
     type Message = Msg;
     type Properties = DateProps;
 
-    fn create(_: &Context<Self>) -> Self {
+    fn create(ctx: &Context<Self>) -> Self {
         Self {
-            event_bus: MyEventBus::dispatcher(),
+            event_bus: ctx.link().bridge_worker::<MyEventBus>(Callback::noop()),
             ele_ref: NodeRef::default(),
             listener: None,
         }

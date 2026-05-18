@@ -7,7 +7,7 @@ use crate::Size;
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct TagProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     /// The HTML tag to use for this component.
@@ -59,7 +59,7 @@ impl Component for Tag {
         let tag = ctx.props().tag.clone();
         html! {
             <@{tag} class={classes} onclick={ctx.props().onclick.clone()}>
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </@>
         }
     }
@@ -71,7 +71,7 @@ impl Component for Tag {
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct TagsProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     /// Attach two tags together; this requires that this component wraps two `Tag` components.
@@ -104,7 +104,7 @@ impl Component for Tags {
         }
         html! {
             <div class={classes}>
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </div>
         }
     }

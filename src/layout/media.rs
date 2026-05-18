@@ -5,7 +5,7 @@ use yew::prelude::*;
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct MediaProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     /// The HTML tag to use for this component.
@@ -35,7 +35,7 @@ impl Component for Media {
         classes.push(&ctx.props().classes);
         html! {
             <@{ctx.props().tag.clone()} class={classes}>
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </@>
         }
     }
@@ -47,7 +47,7 @@ impl Component for Media {
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct MediaLeftProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     /// The HTML tag to use for this component.
@@ -77,7 +77,7 @@ impl Component for MediaLeft {
         classes.push(&ctx.props().classes);
         html! {
             <@{ctx.props().tag.clone()} class={classes}>
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </@>
         }
     }
@@ -89,7 +89,7 @@ impl Component for MediaLeft {
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct MediaRightProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     /// The HTML tag to use for this component.
@@ -119,7 +119,7 @@ impl Component for MediaRight {
         classes.push(&ctx.props().classes);
         html! {
             <@{ctx.props().tag.clone()} class={classes}>
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </@>
         }
     }
@@ -131,7 +131,7 @@ impl Component for MediaRight {
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct MediaContentProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     /// The HTML tag to use for this component.
@@ -161,7 +161,7 @@ impl Component for MediaContent {
         classes.push(&ctx.props().classes);
         html! {
             <@{ctx.props().tag.clone()} class={classes}>
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </@>
         }
     }

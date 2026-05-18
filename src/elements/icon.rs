@@ -6,7 +6,7 @@ use crate::{Alignment, Size};
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct IconProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
      #[prop_or_default]
     pub text: String,
     #[prop_or_default]
@@ -57,7 +57,7 @@ impl Component for Icon {
                         if let Some(icon) = &ctx.props().awesome_icon {
                             <i class={icon}></i>
                         }
-                        { for ctx.props().children.iter() }
+                        {ctx.props().children.clone()}
                     </span>
                     <span>{ctx.props().text.clone()}</span>
                 </span>
@@ -68,7 +68,7 @@ impl Component for Icon {
                     if let Some(icon) = &ctx.props().awesome_icon {
                         <i class={icon}></i>
                     }
-                    { for ctx.props().children.iter() }
+                    {ctx.props().children.clone()}
                 </span>
             }
         }

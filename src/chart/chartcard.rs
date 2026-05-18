@@ -4,7 +4,7 @@ use log::debug;
 use serde::{Deserialize, Serialize};
 use web_sys::Element;
 use yew::prelude::*;
-use yew_agent::{Bridge, Bridged};
+use yew_agent::scope_ext::{AgentScopeExt, WorkerBridgeHandle};
 
 use crate::chart::timeseries::{
     create_series_floats, create_series_ints, create_series_mix, render_ts_floats, render_ts_ints,
@@ -37,7 +37,7 @@ pub struct ChartView {
     average_value: Option<f64>,
     sum_value: Option<f64>,
     #[allow(dead_code)]
-    subscription: Box<dyn Bridge<MyEventBus>>,
+    subscription: WorkerBridgeHandle<MyEventBus>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -111,16 +111,11 @@ impl Component for ChartView {
         } else {
             false
         };
-        let cb = {
-            let link = ctx.link().clone();
-            move |msg| {
-                link.send_message(match msg {
-                    MyMsg::ChartMsg(message) => message,
-                    _ => Msg::None,
-                })
-            }
-        };
-        let subscription = MyEventBus::bridge(std::rc::Rc::new(cb));
+        let cb = ctx.link().callback(|msg: MyMsg| match msg {
+            MyMsg::ChartMsg(message) => message,
+            _ => Msg::None,
+        });
+        let subscription = ctx.link().bridge_worker::<MyEventBus>(cb);
         Self {
             chart: None,
             data: None,

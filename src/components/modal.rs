@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use yew::prelude::*;
-use yew_agent::{Bridge, Bridged};
+use yew_agent::scope_ext::{AgentScopeExt, WorkerBridgeHandle};
 
 use crate::{MyEventBus, MyMsg};
 
@@ -18,7 +18,7 @@ pub struct ModalProps {
     pub id: String,
     /// The content of the `"modal-content"` element.
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     /// The contents of the modal trigger, typically a button or the like.
     #[prop_or_default]
     pub trigger: Html,
@@ -34,7 +34,7 @@ pub struct ModalProps {
 /// in your app for maximum flexibility.
 pub struct Modal {
     #[allow(dead_code)]
-    subscription: Box<dyn Bridge<MyEventBus>>,
+    subscription: WorkerBridgeHandle<MyEventBus>,
     is_active: bool,
 }
 
@@ -43,16 +43,11 @@ impl Component for Modal {
     type Properties = ModalProps;
 
     fn create(ctx: &Context<Self>) -> Self {
-        let cb = {
-            let link = ctx.link().clone();
-            move |msg| {
-                link.send_message(match msg {
-                    MyMsg::Modal(message) => message,
-                    _ => ModalMsg::None,
-                })
-            }
-        };
-        let subscription = MyEventBus::bridge(std::rc::Rc::new(cb));
+        let cb = ctx.link().callback(|msg: MyMsg| match msg {
+            MyMsg::Modal(message) => message,
+            _ => ModalMsg::None,
+        });
+        let subscription = ctx.link().bridge_worker::<MyEventBus>(cb);
         Self {
             subscription,
             is_active: false,
@@ -95,7 +90,7 @@ impl Component for Modal {
             <div id={ctx.props().id.clone()} class={classes}>
                 <div class={"modal-background"} onclick={closecb.clone()}></div>
                 <div class={"modal-content"}>
-                    { for ctx.props().children.iter() }
+                    {ctx.props().children.clone()}
                 </div>
                 <button class={"modal-close is-large"} aria-label={"close"} onclick={closecb}></button>
             </div>
@@ -142,7 +137,7 @@ pub struct ModalCardProps {
 /// in your app for maximum flexibility.
 pub struct ModalCard {
     #[allow(dead_code)]
-    subscription: Box<dyn Bridge<MyEventBus>>,
+    subscription: WorkerBridgeHandle<MyEventBus>,
     is_active: bool,
 }
 
@@ -151,16 +146,11 @@ impl Component for ModalCard {
     type Properties = ModalCardProps;
 
     fn create(ctx: &Context<Self>) -> Self {
-        let cb = {
-            let link = ctx.link().clone();
-            move |msg| {
-                link.send_message(match msg {
-                    MyMsg::Modal(message) => message,
-                    _ => ModalMsg::None,
-                })
-            }
-        };
-        let subscription = MyEventBus::bridge(std::rc::Rc::new(cb));
+        let cb = ctx.link().callback(|msg: MyMsg| match msg {
+            MyMsg::Modal(message) => message,
+            _ => ModalMsg::None,
+        });
+        let subscription = ctx.link().bridge_worker::<MyEventBus>(cb);
         Self {
             subscription,
             is_active: false,

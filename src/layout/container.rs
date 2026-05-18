@@ -3,7 +3,7 @@ use yew::prelude::*;
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct ContainerProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     /// Add a `32px` margin to the left and right sides of the container.
@@ -36,7 +36,7 @@ impl Component for Container {
         }
         html! {
             <div class={classes}>
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </div>
         }
     }
