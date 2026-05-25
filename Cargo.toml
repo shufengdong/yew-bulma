@@ -8,7 +8,7 @@ categories = ["wasm", "web-programming"]
 keywords = ["wasm", "web", "bulma", "sass", "yew"]
 
 [workspace.package]
-rust-version = "1.80.0"
+rust-version = "1.84.0"
 edition = "2021"
 repository = "https://github.com/shufengdong/yew-bulma"
 license = "Apache-2.0"
