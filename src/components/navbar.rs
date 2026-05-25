@@ -13,7 +13,7 @@ pub enum NavbarMsg {
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct NavbarProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     /// Make the navbar fixed to the top or bottom of the UI.
@@ -186,7 +186,7 @@ pub enum NavbarItemTag {
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct NavbarItemProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     /// The HTML tag to use for this component.
@@ -262,14 +262,14 @@ impl Component for NavbarItem {
                         target={ctx.props().target.clone().unwrap_or_default()}
                         onclick={ctx.props().onclick.clone()}
                     >
-                        { for ctx.props().children.iter() }
+                        {ctx.props().children.clone()}
                     </a>
                 }
             }
             NavbarItemTag::Div => {
                 html! {
                     <div class={classes} onclick={ctx.props().onclick.clone()}>
-                        { for ctx.props().children.iter() }
+                        {ctx.props().children.clone()}
                     </div>
                 }
             }
@@ -319,7 +319,7 @@ impl Component for NavbarDivider {
 pub struct NavbarDropdownProps {
     /// The content of the dropdown; these should all be `NavbarItems` & `NavbarDividers`.
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     /// The contents of the navbar-link used for triggering the dropdown menu.
@@ -415,7 +415,7 @@ impl Component for NavbarDropdown {
                 {overlay}
                 <a class={linkclasses} onclick={opencb}>{ctx.props().navlink.clone()}</a>
                 <div class={dropclasses}>
-                    { for ctx.props().children.iter() }
+                    {ctx.props().children.clone()}
                 </div>
             </div>
         }

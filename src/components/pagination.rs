@@ -8,7 +8,7 @@ use crate::{Alignment, Size};
 pub struct PaginationProps {
     /// The child `li`, `pagination-link` & `pagination-ellipsis` elements for pagination.
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     /// The size of this component.
@@ -61,7 +61,7 @@ impl Component for Pagination {
                 {ctx.props().previous.clone()}
                 {ctx.props().next.clone()}
                 <ul class="pagination-list">
-                    { for ctx.props().children.iter() }
+                    {ctx.props().children.clone()}
                 </ul>
             </nav>
         }
@@ -74,7 +74,7 @@ impl Component for Pagination {
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct PaginationItemProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     #[prop_or_default]
@@ -117,7 +117,7 @@ impl Component for PaginationItem {
         html! {
             <a class={classes}
                 aria-label={ctx.props().label.clone()} onclick={ctx.props().onclick.clone()}>
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </a>
         }
     }

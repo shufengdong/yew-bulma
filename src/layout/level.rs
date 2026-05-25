@@ -5,7 +5,7 @@ use yew::prelude::*;
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct LevelProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     /// The HTML tag to use for this component.
@@ -35,7 +35,7 @@ impl Component for Level {
         classes.push(&ctx.props().classes);
         html! {
             <@{ctx.props().tag.clone()} class={classes}>
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </@>
         }
     }
@@ -47,7 +47,7 @@ impl Component for Level {
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct LevelLeftProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     /// The HTML tag to use for this component.
@@ -77,7 +77,7 @@ impl Component for LevelLeft {
         classes.push(&ctx.props().classes);
         html! {
             <@{ctx.props().tag.clone()} class={classes}>
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </@>
         }
     }
@@ -89,7 +89,7 @@ impl Component for LevelLeft {
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct LevelRightProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     /// The HTML tag to use for this component.
@@ -119,7 +119,7 @@ impl Component for LevelRight {
         classes.push(&ctx.props().classes);
         html! {
             <@{ctx.props().tag.clone()} class={classes}>
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </@>
         }
     }
@@ -131,7 +131,7 @@ impl Component for LevelRight {
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct LevelItemProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     /// The HTML tag to use for this component.
@@ -161,7 +161,7 @@ impl Component for LevelItem {
         classes.push(&ctx.props().classes);
         html! {
             <@{ctx.props().tag.clone()} class={classes}>
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </@>
         }
     }

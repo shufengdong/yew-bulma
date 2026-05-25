@@ -16,7 +16,7 @@ pub struct SelectProps {
 
     /// The `option` & `optgroup` tags of this select component.
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
 
@@ -81,7 +81,7 @@ impl Component for Select {
                     disabled={ctx.props().disabled}
                     onchange={link.callback(|_| ())}
                 >
-                    { for ctx.props().children.iter() }
+                    {ctx.props().children.clone()}
                 </select>
             </div>
         }
@@ -102,7 +102,7 @@ pub struct MultiSelectProps {
 
     /// The `option` & `optgroup` tags of this select component.
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
 
@@ -175,7 +175,7 @@ impl Component for MultiSelect {
                     disabled={ctx.props().disabled}
                     onchange={link.callback(|_| ())}
                 >
-                    { for ctx.props().children.iter() }
+                    {ctx.props().children.clone()}
                 </select>
             </div>
         }

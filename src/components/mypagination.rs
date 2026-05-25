@@ -124,142 +124,84 @@ impl Component for MyPagination {
         } else {
             total_item_num / row_num_per_page
         };
-        let mut pagination_body_items = vec![];
+        let ellipsis = html! { <span class="pagination-ellipsis">{"\u{2026}"}</span> };
         // 页码自动省略
-        let pagination_body;
-        if pagination_sum <= 8 {
+        let page_now = current_page;
+        let last_page = pagination_sum;
+        let pagination_body = if pagination_sum <= 8 {
             //如果总页码小于8，则全部展示
-            for i in 1..(pagination_sum + 1) {
-                pagination_body_items.push(i);
+            html! {
+                for n in 1..=pagination_sum {
+                    <PaginationItem item_type={PaginationItemType::Link}
+                        is_current={current_page == n}
+                        onclick={link.callback(move |_| Msg::ChangePagination(n))}>
+                        {n.to_string()}
+                    </PaginationItem>
+                }
             }
-            pagination_body = html! {
-                pagination_body_items.into_iter().map(|n| {
-                    html! {
-                        <>
-                        <PaginationItem item_type={PaginationItemType::Link}
-                            is_current={current_page == n}
-                            onclick={link.callback(move |_| Msg::ChangePagination(n))}>
-                            {n.to_string()}
-                        </PaginationItem>
-                        </>
-                    }
-                }).collect::<Html>()
-            };
+        } else if (1..=4).contains(&page_now) {
+            //如果为前四页：1..=5 + ... + last
+            html! {
+                <>
+                for n in 1..=5 {
+                    <PaginationItem item_type={PaginationItemType::Link}
+                        is_current={current_page == n}
+                        onclick={link.callback(move |_| Msg::ChangePagination(n))}>
+                        {n.to_string()}
+                    </PaginationItem>
+                }
+                {ellipsis.clone()}
+                <PaginationItem item_type={PaginationItemType::Link}
+                    is_current={current_page == last_page}
+                    onclick={link.callback(move |_| Msg::ChangePagination(last_page))}>
+                    {last_page.to_string()}
+                </PaginationItem>
+                </>
+            }
+        } else if page_now >= last_page - 3 && page_now <= last_page {
+            //后四页：1 + ... + (t-4)..=t
+            html! {
+                <>
+                <PaginationItem item_type={PaginationItemType::Link}
+                    is_current={current_page == 1}
+                    onclick={link.callback(move |_| Msg::ChangePagination(1))}>
+                    {"1"}
+                </PaginationItem>
+                {ellipsis.clone()}
+                for n in (last_page - 4)..=last_page {
+                    <PaginationItem item_type={PaginationItemType::Link}
+                        is_current={current_page == n}
+                        onclick={link.callback(move |_| Msg::ChangePagination(n))}>
+                        {n.to_string()}
+                    </PaginationItem>
+                }
+                </>
+            }
         } else {
-            //如果超过8，则省略显示
-            let page_now = current_page;
-            if (1..=4).contains(&page_now) {
-                //如果为前四页
-                let last_page = pagination_sum;
-                pagination_body = html! {
-                    <>
+            //中间几页：1 + ... + (page_now-1)..=(page_now+1) + ... + last
+            html! {
+                <>
+                <PaginationItem item_type={PaginationItemType::Link}
+                    is_current={current_page == 1}
+                    onclick={link.callback(move |_| Msg::ChangePagination(1))}>
+                    {"1"}
+                </PaginationItem>
+                {ellipsis.clone()}
+                for n in (page_now - 1)..=(page_now + 1) {
                     <PaginationItem item_type={PaginationItemType::Link}
-                        is_current={current_page == 1}
-                        onclick={link.callback(move |_| Msg::ChangePagination(1))}>
-                        {"1"}
+                        is_current={current_page == n}
+                        onclick={link.callback(move |_| Msg::ChangePagination(n))}>
+                        {n.to_string()}
                     </PaginationItem>
-                    <PaginationItem item_type={PaginationItemType::Link}
-                        is_current={current_page == 2}
-                        onclick={link.callback(move |_| Msg::ChangePagination(2))}>
-                        {"2"}
-                    </PaginationItem>
-                    <PaginationItem item_type={PaginationItemType::Link}
-                        is_current={current_page == 3}
-                        onclick={link.callback(move |_| Msg::ChangePagination(3))}>
-                        {"3"}
-                    </PaginationItem>
-                    <PaginationItem item_type={PaginationItemType::Link}
-                        is_current={current_page == 4}
-                        onclick={link.callback(move |_| Msg::ChangePagination(4))}>
-                        {"4"}
-                    </PaginationItem>
-                    <PaginationItem item_type={PaginationItemType::Link}
-                        is_current={current_page == 5}
-                        onclick={link.callback(move |_| Msg::ChangePagination(5))}>
-                        {"5"}
-                    </PaginationItem>
-                    <span class="pagination-ellipsis">{"\u{2026}"}</span>
-                    <PaginationItem item_type={PaginationItemType::Link}
-                        is_current={current_page == last_page}
-                        onclick={link.callback(move |_| Msg::ChangePagination(last_page))}>
-                        {last_page}
-                    </PaginationItem>
-                    </>
-                };
-            } else if page_now >= (pagination_sum - 3) && page_now <= pagination_sum {
-                //后四页
-                let t = pagination_sum;
-                pagination_body = html! {
-                    <>
-                    <PaginationItem item_type={PaginationItemType::Link}
-                        is_current={current_page == 1}
-                        onclick={link.callback(move |_| Msg::ChangePagination(1))}>
-                        {"1"}
-                    </PaginationItem>
-                    <span class="pagination-ellipsis">{"\u{2026}"}</span>
-                    <PaginationItem item_type={PaginationItemType::Link}
-                        is_current={current_page == t-4}
-                        onclick={link.callback(move |_| Msg::ChangePagination(t-4))}>
-                        {(t-4).to_string()}
-                    </PaginationItem>
-                    <PaginationItem item_type={PaginationItemType::Link}
-                        is_current={current_page == t-3}
-                        onclick={link.callback(move |_| Msg::ChangePagination(t-3))}>
-                        {(t-3).to_string()}
-                    </PaginationItem>
-                    <PaginationItem item_type={PaginationItemType::Link}
-                        is_current={current_page == t-2}
-                        onclick={link.callback(move |_| Msg::ChangePagination(t-2))}>
-                        {(t-2).to_string()}
-                    </PaginationItem>
-                    <PaginationItem item_type={PaginationItemType::Link}
-                        is_current={current_page == t-1}
-                        onclick={link.callback(move |_| Msg::ChangePagination(t-1))}>
-                        {(t-1).to_string()}
-                    </PaginationItem>
-                    <PaginationItem item_type={PaginationItemType::Link}
-                        is_current={current_page == t}
-                        onclick={link.callback(move |_| Msg::ChangePagination(t))}>
-                        {t.to_string()}
-                    </PaginationItem>
-                    </>
-                };
-            } else {
-                //如果是中间几页
-                let last_page = pagination_sum;
-                pagination_body = html! {
-                    <>
-                    <PaginationItem item_type={PaginationItemType::Link}
-                        is_current={current_page == 1}
-                        onclick={link.callback(move |_| Msg::ChangePagination(1))}>
-                        {"1"}
-                    </PaginationItem>
-                    <span class="pagination-ellipsis">{"\u{2026}"}</span>
-                    <PaginationItem item_type={PaginationItemType::Link}
-                        is_current={current_page == page_now-1}
-                        onclick={link.callback(move |_| Msg::ChangePagination(page_now-1))}>
-                        {(page_now-1).to_string()}
-                    </PaginationItem>
-                    <PaginationItem item_type={PaginationItemType::Link}
-                        is_current={current_page == page_now}
-                        onclick={link.callback(move |_| Msg::ChangePagination(page_now))}>
-                        {page_now.to_string()}
-                    </PaginationItem>
-                    <PaginationItem item_type={PaginationItemType::Link}
-                        is_current={current_page == page_now+1}
-                        onclick={link.callback(move |_| Msg::ChangePagination(page_now+1))}>
-                        {(page_now+1).to_string()}
-                    </PaginationItem>
-
-                    <span class="pagination-ellipsis">{"\u{2026}"}</span>
-                    <PaginationItem item_type={PaginationItemType::Link}
-                        is_current={current_page == last_page}
-                        onclick={link.callback(move |_| Msg::ChangePagination(last_page))}>
-                        {last_page}
-                    </PaginationItem>
-                    </>
-                };
-            };
+                }
+                {ellipsis}
+                <PaginationItem item_type={PaginationItemType::Link}
+                    is_current={current_page == last_page}
+                    onclick={link.callback(move |_| Msg::ChangePagination(last_page))}>
+                    {last_page.to_string()}
+                </PaginationItem>
+                </>
+            }
         };
         // 页码跳转查询框
         let pagination_jump = html! {

@@ -4,7 +4,7 @@ use yew::prelude::*;
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct FieldProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     /// A text label for the field.
@@ -142,7 +142,7 @@ impl Component for Field {
         };
 
         // Build the body section.
-        let mut body = html! {<>{ for ctx.props().children.iter() }</>};
+        let mut body = html! {<>{ctx.props().children.clone()}</>};
         if ctx.props().horizontal {
             body = html! {<div class={"field-body"}>{body}</div>}
         }

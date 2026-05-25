@@ -19,7 +19,7 @@ use web_sys::{CloseEvent, ErrorEvent, FormData, Headers, HtmlInputElement, HtmlS
               HtmlTextAreaElement, MessageEvent, Request, RequestInit, Response, WebSocket};
 use yew::html::IntoPropValue;
 use yew::prelude::*;
-use yew_agent::{HandlerId, Public, WorkerLink};
+use yew_agent::worker::{HandlerId, Worker, WorkerScope};
 
 pub use columns::*;
 pub use components::breadcrumb::*;
@@ -587,43 +587,34 @@ pub enum MyMsg {
     Loading(components::myloading::LoadingMsg),
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug, Default)]
 pub struct MyEventBus {
-    link: WorkerLink<Self>,
     subscribers: HashSet<HandlerId>,
 }
 
-impl yew_agent::Worker for MyEventBus {
-    type Reach = Public<Self>;
+impl Worker for MyEventBus {
     type Message = ();
     type Input = MyMsg;
     type Output = MyMsg;
 
-    fn create(link: WorkerLink<Self>) -> Self {
-        Self {
-            link,
-            subscribers: HashSet::new(),
-        }
+    fn create(_scope: &WorkerScope<Self>) -> Self {
+        Self::default()
     }
 
-    fn update(&mut self, _msg: Self::Message) {}
+    fn update(&mut self, _scope: &WorkerScope<Self>, _msg: Self::Message) {}
 
-    fn connected(&mut self, id: HandlerId) {
+    fn connected(&mut self, _scope: &WorkerScope<Self>, id: HandlerId) {
         self.subscribers.insert(id);
     }
 
-    fn handle_input(&mut self, msg: Self::Input, _id: HandlerId) {
-        for sub in self.subscribers.iter() {
-            self.link.respond(*sub, msg.clone());
+    fn received(&mut self, scope: &WorkerScope<Self>, msg: Self::Input, _id: HandlerId) {
+        for sub in &self.subscribers {
+            scope.respond(*sub, msg.clone());
         }
     }
 
-    fn disconnected(&mut self, id: HandlerId) {
+    fn disconnected(&mut self, _scope: &WorkerScope<Self>, id: HandlerId) {
         self.subscribers.remove(&id);
-    }
-
-    fn name_of_resource() -> &'static str {
-        "bulma-worker.js"
     }
 }
 

@@ -4,7 +4,7 @@ use yew::prelude::*;
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct ImageProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     /// The size of this component.
@@ -37,7 +37,7 @@ impl Component for Image {
         }
         html! {
             <figure class={classes}>
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </figure>
         }
     }

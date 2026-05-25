@@ -6,7 +6,7 @@ use yew::prelude::*;
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct TitleProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     /// The HTML tag to use for this component.
@@ -52,7 +52,7 @@ impl Component for Title {
         let tag = ctx.props().tag.clone();
         html! {
             <@{tag} class={classes} title={ctx.props().title.clone()}>
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </@>
         }
     }
@@ -64,7 +64,7 @@ impl Component for Title {
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct SubtitleProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     /// The HTML tag to use for this component.
@@ -104,7 +104,7 @@ impl Component for Subtitle {
         let tag = ctx.props().tag.clone();
         html! {
             <@{tag} class={classes} title={ctx.props().title.clone()}>
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </@>
         }
     }

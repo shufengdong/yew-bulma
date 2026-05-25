@@ -3,7 +3,7 @@ use yew::prelude::*;
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct MenuProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
 }
@@ -30,7 +30,7 @@ impl Component for Menu {
         classes.push(&ctx.props().classes);
         html! {
             <aside class={classes}>
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </aside>
         }
     }
@@ -43,7 +43,7 @@ impl Component for Menu {
 pub struct MenuListProps {
     /// The child `li` elements of this list.
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
 }
@@ -70,7 +70,7 @@ impl Component for MenuList {
         classes.push(&ctx.props().classes);
         html! {
             <ul class={classes}>
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </ul>
         }
     }

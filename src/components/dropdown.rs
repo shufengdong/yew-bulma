@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use yew::prelude::*;
-use yew_agent::{Bridge, Bridged};
+use yew_agent::scope_ext::{AgentScopeExt, WorkerBridgeHandle};
 
 use crate::elements::button::Button;
 use crate::{MyEventBus, MyMsg};
@@ -13,7 +13,7 @@ pub struct DropdownProps {
     ///
     /// This content will be placed directly within the `div.dropdown-content` container.
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     /// Make this dropdown triggerable based on hover.
@@ -40,7 +40,7 @@ pub enum DropdownMsg {
 /// [https://bulma.io/documentation/components/dropdown/](https://bulma.io/documentation/components/dropdown/)
 pub struct Dropdown {
     #[allow(dead_code)]
-    subscription: Box<dyn Bridge<MyEventBus>>,
+    subscription: WorkerBridgeHandle<MyEventBus>,
     is_menu_active: bool,
 }
 
@@ -49,16 +49,11 @@ impl Component for Dropdown {
     type Properties = DropdownProps;
 
     fn create(ctx: &Context<Self>) -> Self {
-        let cb = {
-            let link = ctx.link().clone();
-            move |msg| {
-                link.send_message(match msg {
-                    MyMsg::Dropdown(message) => message,
-                    _ => DropdownMsg::None,
-                })
-            }
-        };
-        let subscription = MyEventBus::bridge(std::rc::Rc::new(cb));
+        let cb = ctx.link().callback(|msg: MyMsg| match msg {
+            MyMsg::Dropdown(message) => message,
+            _ => DropdownMsg::None,
+        });
+        let subscription = ctx.link().bridge_worker::<MyEventBus>(cb);
         Self {
             subscription,
             is_menu_active: false,
@@ -110,7 +105,7 @@ impl Component for Dropdown {
                 </div>
                 <div class={"dropdown-menu"} role={"menu"} style={"min-width: unset"}>
                     <div class={"dropdown-content"}>
-                        { for ctx.props().children.iter() }
+                        {ctx.props().children.clone()}
                     </div>
                 </div>
             </div>

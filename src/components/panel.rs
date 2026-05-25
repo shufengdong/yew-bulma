@@ -6,7 +6,7 @@ use yew::prelude::*;
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct PanelProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     /// The HTML content of this panel's heading; it is automatically wrapped in a `p.panel-heading`.
@@ -37,7 +37,7 @@ impl Component for Panel {
         html! {
             <nav class={classes}>
                 <p class={"panel-heading"}>{ctx.props().heading.clone()}</p>
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </nav>
         }
     }
@@ -49,7 +49,7 @@ impl Component for Panel {
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct PanelTabsProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
 }
 
 /// A container for the navigation tabs of a panel.
@@ -72,7 +72,7 @@ impl Component for PanelTabs {
     fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
             <p class={"panel-tabs"}>
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </p>
         }
     }
@@ -84,7 +84,7 @@ impl Component for PanelTabs {
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct PanelBlockProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     /// The HTML tag to use for this component.
     #[prop_or_else(|| "div".into())]
     pub tag: String,
@@ -121,7 +121,7 @@ impl Component for PanelBlock {
         let tag = ctx.props().tag.clone();
         html! {
             <@{tag} class={classes} onclick={ctx.props().onclick.clone()}>
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </@>
         }
     }

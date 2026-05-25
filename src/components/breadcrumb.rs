@@ -7,7 +7,7 @@ use crate::Alignment;
 pub struct BreadcrumbProps {
     /// The `li` child elements of this breadcrumb.
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     /// The size of this component.
@@ -53,7 +53,7 @@ impl Component for Breadcrumb {
         html! {
             <nav class={classes} aria-label={"breadcrumbs"}>
                 <ul>
-                    { for ctx.props().children.iter() }
+                    {ctx.props().children.clone()}
                 </ul>
             </nav>
         }

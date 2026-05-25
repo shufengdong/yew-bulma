@@ -175,59 +175,55 @@ impl TileTree {
 
     pub fn create_html(&self, prefix: Option<String>, selected: usize, mut nodes: HashMap<String, VNode>) -> VNode {
         let root_index = NodeIndex::new(0);
-        let class_str = self.tree.node_weight(root_index).unwrap().create_class(false);
-        let top_node = html! { <div class={class_str}/> };
-        // 开始深度优先遍历
-        let mut stack = Vec::new();
-        let mut stack2 = Vec::with_capacity(self.tree.node_count());
-        let mut node_pos = HashMap::with_capacity(self.tree.node_count());
-        stack.push((root_index, top_node));
-        while let Some((node_index, current_node)) = stack.pop() {
+        // 先做 DFS，仅记录每个节点的有序子节点列表和访问顺序，不构造 VNode
+        let mut post_order = Vec::with_capacity(self.tree.node_count());
+        let mut children_order: HashMap<NodeIndex, Vec<NodeIndex>> =
+            HashMap::with_capacity(self.tree.node_count());
+        let mut stack = vec![root_index];
+        while let Some(node_index) = stack.pop() {
             let mut edges: Vec<EdgeReference<usize>> = self.tree.edges(node_index).collect();
-            // 按照权重排序
             edges.sort_by(|a, b| a.weight().cmp(b.weight()));
+            let mut ordered = Vec::with_capacity(edges.len());
             for edge in edges {
                 let child_index = edge.target();
-                let child = self.tree.node_weight(child_index).unwrap();
-                let class_str = child.create_class(child_index.index() == selected);
-                let child = if child.node_type != NodeType::Child {
-                    html! { <div class={class_str}/> }
-                } else if let Some(s) = &prefix {
-                    let id = format!("{}-tile({})", s, child_index.index());
-                    let mut div = html! { <div id={id.clone()} class={class_str}/> };
-                    if let Some(node) = nodes.remove(&id) {
-                        if let VNode::VTag(father) = &mut div {
-                            father.add_child(node);
-                        }
-                    }
-                    div
+                ordered.push(child_index);
+                stack.push(child_index);
+            }
+            children_order.insert(node_index, ordered);
+            post_order.push(node_index);
+        }
+        // 自底向上构造，每个节点构造时已经持有其全部子节点
+        let mut built: HashMap<NodeIndex, VNode> = HashMap::with_capacity(self.tree.node_count());
+        while let Some(node_index) = post_order.pop() {
+            let weight = self.tree.node_weight(node_index).unwrap();
+            let is_selected = node_index != root_index && node_index.index() == selected;
+            let class_str = weight.create_class(is_selected);
+            let children_html: Html = children_order
+                .remove(&node_index)
+                .unwrap_or_default()
+                .into_iter()
+                .map(|c| built.remove(&c).unwrap())
+                .collect();
+            let v = if node_index == root_index || weight.node_type != NodeType::Child {
+                html! { <div class={class_str}>{children_html}</div> }
+            } else {
+                let id = if let Some(s) = &prefix {
+                    format!("{}-tile({})", s, node_index.index())
                 } else {
-                    let id = format!("Tile({})", child_index.index());
-                    let mut div = html! { <div id={id.clone()} class={class_str}/> };
-                    if let Some(node) = nodes.remove(&id) {
-                        if let VNode::VTag(father) = &mut div {
-                            father.add_child(node);
-                        }
-                    }
-                    div
+                    format!("Tile({})", node_index.index())
                 };
-                stack.push((child_index, child));
-            }
-            node_pos.insert(node_index, stack2.len());
-            stack2.push((node_index, current_node));
-        }
-        while stack2.len() > 1 {
-            let (node_index, current_node) = stack2.pop().unwrap();
-            let edges = self.tree.edges_directed(node_index, Incoming);
-            for edge in edges {
-                let father_pos = node_pos.get(&edge.source()).unwrap();
-                if let VNode::VTag(father) = &mut stack2[*father_pos].1 {
-                    father.add_child(current_node);
-                    break;
+                match nodes.remove(&id) {
+                    Some(node) => html! {
+                        <div id={id} class={class_str}>{node}{children_html}</div>
+                    },
+                    None => html! {
+                        <div id={id} class={class_str}>{children_html}</div>
+                    },
                 }
-            }
+            };
+            built.insert(node_index, v);
         }
-        stack2.pop().unwrap().1
+        built.remove(&root_index).unwrap()
     }
 }
 

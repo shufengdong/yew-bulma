@@ -3,7 +3,7 @@ use yew::prelude::*;
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct ColumnsProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     /// Align child columns vertically.
@@ -48,7 +48,7 @@ impl Component for Columns {
         }
         html! {
             <div class={classes}>
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </div>
         }
     }
@@ -60,7 +60,7 @@ impl Component for Columns {
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct ColumnProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
 }
@@ -91,7 +91,7 @@ impl Component for Column {
         classes.push(&ctx.props().classes);
         html! {
             <div class={classes}>
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </div>
         }
     }

@@ -3,7 +3,7 @@ use yew::prelude::*;
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct TableProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     /// Add borders to all the cells.
@@ -65,14 +65,14 @@ impl Component for Table {
             html! {
                 <div class={"table-container"}>
                     <table class={classes}>
-                        { for ctx.props().children.iter() }
+                        {ctx.props().children.clone()}
                     </table>
                 </div>
             }
         } else {
             html! {
                 <table class={classes}>
-                    { for ctx.props().children.iter() }
+                    {ctx.props().children.clone()}
                 </table>
             }
         }
@@ -82,7 +82,7 @@ impl Component for Table {
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct TableTrProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     /// Add a selected show to the row.
@@ -115,7 +115,7 @@ impl Component for TableTr {
         };
         html! {
             <tr class={classes}>
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </tr>
         }
     }

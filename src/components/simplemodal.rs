@@ -17,7 +17,7 @@ pub struct SimpleModalCardProps {
     #[prop_or_default]
     pub button_title1: Option<String>,
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub hidden: Option<bool>,
     #[prop_or_default]
@@ -112,7 +112,7 @@ impl Component for SimpleModalCard {
                                 onclick={link.callback(move |_|Msg::Close)}></button>
                         </header>
                         <section class={"modal-card-body"} ref={ctx.props().content_ref.clone()}>
-                            { for ctx.props().children.iter() }
+                            {ctx.props().children.clone()}
                         </section>
                         if need_foot {
                             <footer class="modal-card-foot">

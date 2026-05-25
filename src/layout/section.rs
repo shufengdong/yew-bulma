@@ -4,7 +4,7 @@ use yew::prelude::*;
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct SectionProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     /// A size modifier to control spacing.
@@ -37,7 +37,7 @@ impl Component for Section {
         }
         html! {
             <section class={classes}>
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </section>
         }
     }

@@ -3,7 +3,7 @@ use yew::prelude::*;
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct NotificationProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     #[prop_or_default]
@@ -32,7 +32,7 @@ impl Component for Notification {
         classes.push(&ctx.props().classes);
         html! {
             <div class={classes} ref={ctx.props().r#ref.clone()}>
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </div>
         }
     }

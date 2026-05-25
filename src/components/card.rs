@@ -3,7 +3,7 @@ use yew::prelude::*;
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct CardProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     #[prop_or("".to_string())]
@@ -45,7 +45,7 @@ impl Component for Card {
         }
         html! {
             <div class={classes} style={style}>
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </div>
         }
     }
@@ -57,7 +57,7 @@ impl Component for Card {
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct CardHeaderProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
 }
@@ -84,7 +84,7 @@ impl Component for CardHeader {
         classes.push(&ctx.props().classes);
         html! {
             <header class={classes}>
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </header>
         }
     }
@@ -96,7 +96,7 @@ impl Component for CardHeader {
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct CardImageProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
 }
@@ -123,7 +123,7 @@ impl Component for CardImage {
         classes.push(&ctx.props().classes);
         html! {
             <div class={classes}>
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </div>
         }
     }
@@ -135,7 +135,7 @@ impl Component for CardImage {
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct CardContentProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     #[prop_or_default]
@@ -165,11 +165,11 @@ impl Component for CardContent {
         html! {
             if let Some(id) = &ctx.props().id {
                 <div class={classes} id={id.clone()}>
-                    { for ctx.props().children.iter() }
+                    {ctx.props().children.clone()}
                 </div>
             } else {
                 <div class={classes}>
-                    { for ctx.props().children.iter() }
+                    {ctx.props().children.clone()}
                 </div>
             }
         }
@@ -182,7 +182,7 @@ impl Component for CardContent {
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct CardFooterProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
 }
@@ -209,7 +209,7 @@ impl Component for CardFooter {
         classes.push(&ctx.props().classes);
         html! {
             <footer class={classes}>
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </footer>
         }
     }

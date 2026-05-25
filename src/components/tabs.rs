@@ -5,7 +5,7 @@ use crate::{Alignment, Size};
 #[derive(Clone, Debug, Properties, PartialEq)]
 pub struct TabsProps {
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     /// The alignment of this component.
@@ -77,7 +77,7 @@ impl Component for Tabs {
         html! {
             <div class={classes}>
                 <ul>
-                    { for ctx.props().children.iter() }
+                    {ctx.props().children.clone()}
                 </ul>
             </div>
         }

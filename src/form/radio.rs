@@ -12,7 +12,7 @@ pub struct RadioProps {
     #[prop_or_else(Callback::noop)]
     pub update: Callback<String>,
     #[prop_or_default]
-    pub children: Children,
+    pub children: Html,
     #[prop_or_default]
     pub classes: Option<Classes>,
     /// Disable this component.
@@ -56,7 +56,7 @@ impl Component for Radio {
                     oninput={link.callback(|e: InputEvent| e.data().unwrap_or("none".to_string()))}
                     disabled={ctx.props().disabled}
                     />
-                { for ctx.props().children.iter() }
+                {ctx.props().children.clone()}
             </label>
         }
     }
