@@ -30,7 +30,7 @@ serde_cbor = "0.11"
 petgraph = { version = "0.8", features = ["serde-1"] }
 yew = "0.23"
 yew-agent = "0.5"
-gloo-utils = "0.2"
+gloo-utils = "0.3"
 wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4"
 web-sys = { version = "0.3", features = ["File", "HtmlSelectElement", "HtmlTextAreaElement", "HtmlInputElement", "Request",
